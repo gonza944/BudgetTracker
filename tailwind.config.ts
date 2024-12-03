@@ -8,9 +8,24 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        title: ["var(--font-freudian)", "serif"],
+        paragraph: ["eczar"],
+      },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        backgroundColor: "var(--green)",
+        neutralBackgroundColor: "var(--gray2)",
+        neutralBackgroundColorInverted: "var(--gray1)",
+        primaryColor: "var(--green)",
+        accentColor: "var(--yellow)",
+        secondaryAccentColor: "var(--darkRed)",
+        fontColor: "var(--gray1)",
+        fontColorInverted: "var(--gray2)",
+      },
+      backgroundImage: {
+        "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
+        "gradient-conic":
+          "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
       },
     },
   },
