@@ -1,13 +1,13 @@
 const Balance: React.FC = () => {
   return (
     <>
-      <div className="flex gap-12 max-sm:gap-4">
+      <div className="flex gap-4">
         <p className="text-2xl text-neutralBackgroundColorInverted font-paragraph">
           Daily Balance
         </p>
         <p className="font-paragraph text-2xl text-primaryColor">$10</p>
       </div>
-      <div className="flex gap-12 max-sm:gap-4">
+      <div className="flex gap-4">
         <p className="text-2xl text-neutralBackgroundColorInverted font-paragraph">
           Monthly Balance
         </p>
