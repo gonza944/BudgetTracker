@@ -18,12 +18,6 @@ export interface ProjectBudget {
 const Dashboard: React.FC = async () => {
   const redis = Redis.fromEnv();
 
-  const expensesIndexes: string[] = await redis.zrange(
-    "project:viaje-europa-2024:expenses",
-    20241261,
-    20241271,
-    { byScore: true }
-  );
   const project = (await redis.hmget(
     "project:viaje-europa-2024",
     "budget",
@@ -31,12 +25,24 @@ const Dashboard: React.FC = async () => {
     "total_expenses"
   )) as ProjectBudget | null;
 
+  const expensesIndexes: string[] = await redis.zrange(
+    "project:viaje-europa-2024:expenses",
+    20241261,
+    20241271,
+    { byScore: true }
+  );
+
   const expenses: Array<Expense> = await Promise.all(
     expensesIndexes.map(
       (name) => redis.hgetall(name) as Promise<Expense | null>
     )
   ).then(
     (expenses) => expenses.filter((expense) => expense !== null) as Expense[]
+  );
+
+  const dailyExpenses = expenses.reduce(
+    (acc, expense) => acc + expense.amount,
+    0
   );
 
   return (
@@ -51,7 +57,7 @@ const Dashboard: React.FC = async () => {
         <ExpensesList expenses={expenses} dailyBudget={project?.dailyBudget} />
       </div>
       <div className="col-start-2 max-md:col-start-1 col-span-4 max-md:col-span-1 row-span-1 flex justify-between max-md:flex-col max-md:items-center">
-        <Balance />
+        <Balance dailyBudget={project?.dailyBudget} dailyExpenses={dailyExpenses}/>
       </div>
     </div>
   );
