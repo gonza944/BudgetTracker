@@ -3,7 +3,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Eczar } from "next/font/google";
 
-
 const freudian = localFont({
   src: "./fonts/Freudian.otf",
   variable: "--font-freudian",
@@ -24,9 +23,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${freudian.variable} ${eczar.className} antialiased`}
-      >
-        {children}
+        className={`${freudian.variable} ${eczar.className} antialiased `}>
+        <main className="h-[100vh] p-16 max-sm:m-8 ">{children}</main>
       </body>
     </html>
   );
