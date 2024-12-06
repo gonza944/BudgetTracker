@@ -1,17 +1,29 @@
-const ExpensesList: React.FC = () => {
+import { Expense } from "../page";
+
+interface Expenses {
+  expenses: Pick<Expense, "description" | "amount">[];
+  dailyBudget?: number;
+}
+
+const ExpensesList: React.FC<Expenses> = ({ expenses,dailyBudget }) => {
+
   return (
     <div className="">
-      {[
-        { name: "Budget", price: "$30" },
-        { name: "Pizza in a restaurant", price: "$50" },
-        { name: "supermarket", price: "$10" },
-      ].map((expense, index) => (
+       <div key='dailyBudget' className="flex gap-12 max-sm:gap-6">
+          <p className="text-2xl text-neutralBackgroundColorInverted font-paragraph">
+            Daily Budget
+          </p>
+          <p className="font-paragraph text-2xl text-primaryColor">
+            ${dailyBudget}
+          </p>
+        </div>
+      {expenses.map((expense, index) => (
         <div key={index} className="flex gap-12 max-sm:gap-6">
           <p className="text-2xl text-neutralBackgroundColorInverted font-paragraph">
-            {expense.name}
+            {expense.description}
           </p>
           <p className="font-paragraph text-2xl text-secondaryAccentColor">
-            {expense.price}
+            ${expense.amount}
           </p>
         </div>
       ))}
