@@ -18,68 +18,65 @@ export interface Expense {
 
 const redis = Redis.fromEnv();
 
-export const getProject = async (projectName: string) =>
-  (await redis.hmget(
-    projectName,
-    "budget",
-    "dailyBudget",
-    "total_expenses",
-    "projectName"
-  )) as ProjectBudget | null;
+export const getProject = cache(
+  async (projectName: string) =>
+    (await redis.hmget(
+      projectName,
+      "budget",
+      "dailyBudget",
+      "total_expenses",
+      "projectName"
+    )) as ProjectBudget | null
+);
 
-export const getExpensesIndexes = async (
-  projectName: string,
-  fromDate: number,
-  toDate: number
-) =>
-  (
-    (await redis.zrange(projectName, fromDate, toDate, {
-      byScore: true,
-    })) as string[]
-  ).filter((name) => name !== null);
-export const getExpenses = async (
-  projectName: string,
-  fromDate: number,
-  toDate: number
-) => {
-  const expensesIndexes: string[] = await redis.zrange(
-    projectName,
-    fromDate,
-    toDate,
-    { byScore: true }
-  );
+export const getExpensesIndexes = cache(
+  async (projectName: string, fromDate: number, toDate: number) =>
+    (
+      (await redis.zrange(projectName, fromDate, toDate, {
+        byScore: true,
+      })) as string[]
+    ).filter((name) => name !== null)
+);
 
-  return await Promise.all(
-    expensesIndexes.map(
-      (name) => redis.hgetall(name) as Promise<Expense | null>
-    )
-  ).then(
-    (expenses) => expenses.filter((expense) => expense !== null) as Expense[]
-  );
-};
+export const getExpenses = cache(
+  async (projectName: string, fromDate: number, toDate: number) => {
+    const expensesIndexes: string[] = await redis.zrange(
+      projectName,
+      fromDate,
+      toDate,
+      { byScore: true }
+    );
 
-export const monthlyBudget = async (
-  project: ProjectBudget,
-  fromDate: number,
-  toDate: number
-) => {
-
-  const montlyExpensesIndexes = await getExpensesIndexes(
-    `${project.projectName}:expenses`,
-    fromDate,
-    toDate
-  );
-
-  return await Promise.all(
-    montlyExpensesIndexes.map(
-      (name: string) => redis.hgetall(name) as Promise<Expense | null>
-    )
-  )
-    .then(
+    return await Promise.all(
+      expensesIndexes.map(
+        (name) => redis.hgetall(name) as Promise<Expense | null>
+      )
+    ).then(
       (expenses) => expenses.filter((expense) => expense !== null) as Expense[]
+    );
+  }
+);
+
+export const monthlyBudget = cache(
+  async (project: ProjectBudget, fromDate: number, toDate: number) => {
+    const montlyExpensesIndexes = await getExpensesIndexes(
+      `${project.projectName}:expenses`,
+      fromDate,
+      toDate
+    );
+
+    return await Promise.all(
+      montlyExpensesIndexes.map(
+        (name: string) => redis.hgetall(name) as Promise<Expense | null>
+      )
     )
-    .then((expensesNotNull) =>
-      expensesNotNull.reduce((acc, expense) => acc + expense.amount, 0)
-    )
-    .then((totalExpenses) => project?.dailyBudget! * 30 - totalExpenses);
-};
+      .then(
+        (expenses) =>
+          expenses.filter((expense) => expense !== null) as Expense[]
+      )
+      .then((expensesNotNull) =>
+        expensesNotNull.reduce((acc, expense) => acc + expense.amount, 0)
+      )
+      .then((totalExpenses) => project?.dailyBudget! * 30 - totalExpenses);
+  }
+);

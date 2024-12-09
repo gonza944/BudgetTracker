@@ -1,16 +1,45 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 interface DatePickerProps {
   onDateChanged: (date: Date) => void;
 }
 const DatePicker: React.FC<DatePickerProps> = ({ onDateChanged }) => {
-  const today = new Date();
-  const days = [];
+  const [selectedDate, setselectedDate] = useState(new Date());
+  const days = Array.from({ length: 31 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() - 15 + i); // Start 15 days before today
+    return date;
+  });
 
-  for (let i = -10; i < 10; i++) {
-    days.push(new Date(today.getTime() + i * 24 * 60 * 60 * 1000));
-  }
+  const handleOndateChanged = (date: Date) => {
+    setselectedDate(date);
+    onDateChanged(date);
+  };
+  const centerElement = () => {
+    console.log(
+      document.getElementById(selectedDate.toLocaleDateString("es-ES"))
+    );
+    document
+      .getElementById(selectedDate.toLocaleDateString("es-ES"))
+      ?.scrollIntoView({
+        block: "center",
+        inline: "center",
+        behavior: "smooth",
+      });
+  };
+
+  useEffect(() => {
+    centerElement();
+  }, []);
+
+  useEffect(() => {
+    centerElement();
+  }, [selectedDate]);
 
   return (
-    <div className="flex gap-4 overflow-x-auto no-scrollbar">
+    <div className="flex gap-4 overflow-x-auto no-scrollbar mb-10">
       <button className="text-neutralBackgroundColorInverted font-paragraph border-r-neutralBackgroundColorInverted border-r-[1px] pr-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -29,9 +58,14 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChanged }) => {
 
       {days.map((day) => (
         <button
-          key={day.getDate()}
-          className="text-neutralBackgroundColorInverted hover:text-xl text-base font-paragraph border-r-neutralBackgroundColorInverted border-r-[1px] pr-4"
-          onClick={() => onDateChanged(day)}>
+          key={day.toLocaleDateString("es-ES")}
+          id={day.toLocaleDateString("es-ES")}
+          className={`text-neutralBackgroundColorInverted hover:text-xl ${
+            day.toLocaleDateString("es-ES") ===
+              selectedDate.toLocaleDateString("es-ES") &&
+            "text-accentColor font-bold"
+          } text-base font-paragraph border-r-neutralBackgroundColorInverted border-r-[1px] pr-4`}
+          onClick={() => handleOndateChanged(day)}>
           {day.toLocaleDateString("es-ES")}
         </button>
       ))}
