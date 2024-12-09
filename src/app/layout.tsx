@@ -22,8 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${freudian.variable} ${eczar.className} antialiased `}>
+      <body className={`${freudian.variable} ${eczar.className} antialiased `}>
         <main className="h-[100vh] p-16 max-sm:m-8 ">{children}</main>
       </body>
     </html>
