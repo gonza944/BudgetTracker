@@ -2,6 +2,7 @@
 
 import { Redis } from "@upstash/redis";
 import { cache } from "react";
+import { PROJECTNAME } from "./page";
 
 export interface ProjectBudget {
   budget: number;
@@ -31,11 +32,9 @@ export const getProject = cache(
 
 export const getExpensesIndexes = cache(
   async (projectName: string, fromDate: number, toDate: number) =>
-    (
-      (await redis.zrange(projectName, fromDate, toDate, {
-        byScore: true,
-      })) as string[]
-    ).filter((name) => name !== null)
+    (await redis.zrange(projectName, fromDate, toDate, {
+      byScore: true,
+    })) as string[]
 );
 
 export const getExpenses = cache(
@@ -60,7 +59,7 @@ export const getExpenses = cache(
 export const monthlyBudget = cache(
   async (project: ProjectBudget, fromDate: number, toDate: number) => {
     const montlyExpensesIndexes = await getExpensesIndexes(
-      `${project.projectName}:expenses`,
+      `${PROJECTNAME}:expenses`,
       fromDate,
       toDate
     );

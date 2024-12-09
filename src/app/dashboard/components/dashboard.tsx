@@ -1,6 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Expense, getExpenses, ProjectBudget } from "../dashboardActions";
+import {
+  Expense,
+  getExpenses,
+  ProjectBudget,
+  monthlyBudget as getMontlyBudget,
+} from "../dashboardActions";
 import Balance from "./balance";
 import DatePicker from "./datePicker";
 import ExpensesList from "./expensesList";
@@ -18,11 +23,13 @@ const Dashboard: React.FC<DashboardProps> = ({
   project,
   expenses: initialExpenses,
   remainingBudget: initialRemainingBudget,
-  monthlyBudget,
+  monthlyBudget: initialMonthlyBudget,
   projectName,
 }) => {
   const [selectedDate, setselectedDate] = useState(new Date());
+  const [previousValue, setpreviousValue] = useState(selectedDate);
   const [expenses, setexpenses] = useState(initialExpenses);
+  const [monthlyBudget, setmonthlyBudget] = useState(initialMonthlyBudget);
   const [remainingBudget, setremainingBudget] = useState(
     initialRemainingBudget
   );
@@ -51,6 +58,21 @@ const Dashboard: React.FC<DashboardProps> = ({
         0
       );
       setremainingBudget(project?.dailyBudget! - dailyExpenses);
+      if (previousValue.getMonth() !== selectedDate.getMonth()) {
+        const budgetInAMonth = await getMontlyBudget(
+          project!,
+          Number.parseInt(
+            `${selectedDate.getFullYear()}${
+              selectedDate.getMonth() + 1
+            }11`
+          ),
+          Number.parseInt(
+            `${selectedDate.getFullYear()}${selectedDate.getMonth() + 2}11`
+          )
+        );
+        setmonthlyBudget(budgetInAMonth);
+      }
+      setpreviousValue(selectedDate);
     })();
   }, [selectedDate]);
 

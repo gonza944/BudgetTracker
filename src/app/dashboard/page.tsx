@@ -1,7 +1,7 @@
 import Dashboard from "./components/dashboard";
 import { getExpenses, getProject, monthlyBudget } from "./dashboardActions";
 
-const PROJECTNAME = "project:viaje-europa-2024";
+export const PROJECTNAME = "project:viaje-europa-2024";
 
 const DashboardPage: React.FC = async () => {
   const project = await getProject(PROJECTNAME);

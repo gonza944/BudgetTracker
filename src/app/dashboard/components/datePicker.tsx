@@ -18,9 +18,6 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChanged }) => {
     onDateChanged(date);
   };
   const centerElement = () => {
-    console.log(
-      document.getElementById(selectedDate.toLocaleDateString("es-ES"))
-    );
     document
       .getElementById(selectedDate.toLocaleDateString("es-ES"))
       ?.scrollIntoView({
@@ -60,10 +57,11 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChanged }) => {
         <button
           key={day.toLocaleDateString("es-ES")}
           id={day.toLocaleDateString("es-ES")}
-          className={`text-neutralBackgroundColorInverted hover:text-xl ${
+          className={`hover:text-xl ${
             day.toLocaleDateString("es-ES") ===
-              selectedDate.toLocaleDateString("es-ES") &&
-            "text-accentColor font-bold"
+            selectedDate.toLocaleDateString("es-ES")
+              ? "text-accentColor font-bold"
+              : "text-neutralBackgroundColorInverted"
           } text-base font-paragraph border-r-neutralBackgroundColorInverted border-r-[1px] pr-4`}
           onClick={() => handleOndateChanged(day)}>
           {day.toLocaleDateString("es-ES")}
