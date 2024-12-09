@@ -1,19 +1,17 @@
-import { Redis } from "@upstash/redis";
-import { Expense } from "../page";
 
 interface BalanceProps {
   remainingBudget: number;
-  montlyBudget: number;
+  monthlyBudget: number;
 }
 
-const Balance: React.FC<BalanceProps> = ({ remainingBudget, montlyBudget }) => {
+const Balance: React.FC<BalanceProps> = ({ remainingBudget, monthlyBudget }) => {
   return (
     <>
       <div className="flex gap-4 max-sm:gap-4">
         <p className="text-2xl text-neutralBackgroundColorInverted font-paragraph">
           Daily Balance
         </p>
-        <p className="font-paragraph text-2xl text-primaryColor">
+        <p className={`font-paragraph text-2xl ${remainingBudget > 0 ? 'text-primaryColor' : 'text-secondaryAccentColor'}`}>
           ${remainingBudget}
         </p>
       </div>
@@ -22,7 +20,7 @@ const Balance: React.FC<BalanceProps> = ({ remainingBudget, montlyBudget }) => {
           Monthly Balance
         </p>
         <p className="font-paragraph text-2xl text-primaryColor">
-          ${montlyBudget}
+          ${monthlyBudget}
         </p>
       </div>
     </>

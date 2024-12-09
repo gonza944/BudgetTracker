@@ -11,9 +11,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChanged }) => {
 
   return (
     <div className="flex gap-4 overflow-x-auto no-scrollbar">
-      <button
-        className="text-neutralBackgroundColorInverted font-paragraph border-r-neutralBackgroundColorInverted border-r-[1px] pr-4"
-        onClick={() => onDateChanged(today)}>
+      <button className="text-neutralBackgroundColorInverted font-paragraph border-r-neutralBackgroundColorInverted border-r-[1px] pr-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -33,14 +31,12 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChanged }) => {
         <button
           key={day.getDate()}
           className="text-neutralBackgroundColorInverted hover:text-xl text-base font-paragraph border-r-neutralBackgroundColorInverted border-r-[1px] pr-4"
-          onClick={() => onDateChanged(today)}>
+          onClick={() => onDateChanged(day)}>
           {day.toLocaleDateString("es-ES")}
         </button>
       ))}
 
-      <button
-        className="text-neutralBackgroundColorInverted font-paragraph pr-4"
-        onClick={() => onDateChanged(today)}>
+      <button className="text-neutralBackgroundColorInverted font-paragraph pr-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
