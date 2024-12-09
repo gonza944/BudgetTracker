@@ -5,7 +5,7 @@ interface OverallBalanceProps {
   totalExpenses?: number;
 }
 
-const OverallBalance: React.FC<OverallBalanceProps> = async ({
+const OverallBalance: React.FC<OverallBalanceProps> = ({
   budget,
   totalExpenses,
 }) => {
