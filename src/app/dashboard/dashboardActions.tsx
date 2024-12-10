@@ -40,7 +40,6 @@ export const getExpensesIndexes = cache(
 
 export const getExpenses = cache(
   async (projectName: string, fromDate: number, toDate: number) => {
-    console.log(projectName, fromDate, toDate);
 
     const expensesIndexes: string[] = await redis.zrange(
       projectName,
@@ -48,8 +47,6 @@ export const getExpenses = cache(
       toDate,
       { byScore: true }
     );
-
-    console.log(expensesIndexes);
 
     return await Promise.all(
       expensesIndexes.map(
