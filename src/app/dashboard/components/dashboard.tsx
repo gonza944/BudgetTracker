@@ -10,7 +10,6 @@ import Balance from "./balance";
 import DatePicker from "./datePicker";
 import ExpensesList from "./expensesList";
 import OverallBalance from "./overallBalance";
-
 interface DashboardProps {
   project: ProjectBudget | null;
   expenses: Expense[];
@@ -82,7 +81,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         />
       </div>
       <div className="col-start-3 col-span-3 max-md:col-start-1 max-md:col-span-1 row-span-10 flex justify-between max-md:justify-center">
-        <ExpensesList expenses={expenses} dailyBudget={project?.dailyBudget} />
+        <ExpensesList expenses={expenses} dailyBudget={project?.dailyBudget} selectedDate={selectedDate}/>
       </div>
       <div className="col-start-2 max-md:col-start-1 col-span-4 max-md:col-span-1 row-span-1 flex justify-between max-md:flex-col max-md:items-center">
         <Balance

@@ -79,3 +79,46 @@ export const monthlyBudget = cache(
       .then((totalExpenses) => project?.dailyBudget! * 30 - totalExpenses);
   }
 );
+
+export const createNewExpense = cache(
+  async (formData: FormData, expenseDate: Date) => {
+    const rawFormData = {
+      description: formData.get("description") as string,
+      category: formData.get("category") as string,
+      amount: Number.parseInt(formData.get("amount") as string),
+    };
+    try {
+      if (
+        rawFormData.description &&
+        rawFormData.amount &&
+        rawFormData.category
+      ) {
+        const tx = redis.multi();
+        const year = expenseDate.getFullYear(),
+          month = expenseDate.getMonth() + 1,
+          date = expenseDate.getDate();
+        const expenseOfDayNumber = await redis.zcount(
+          `${PROJECTNAME}:expenses`,
+          Number.parseInt(`${year}${month}${date}1`),
+          Number.parseInt(`${year}${month}${date + 1}1`)
+        );
+
+        tx.zadd(`${PROJECTNAME}:expenses`, {
+          score: Number.parseInt(
+            `${year}${month}${date}${expenseOfDayNumber + 1}`
+          ),
+          member: `expense:${year}${month}${date}${expenseOfDayNumber + 1}`,
+        });
+        tx.hset(
+          `expense:${year}${month}${date}${expenseOfDayNumber + 1}`,
+          rawFormData
+        );
+        tx.hincrby(PROJECTNAME, "total_expenses", rawFormData.amount);
+        tx.sadd("categories", rawFormData.category); 
+
+
+        await tx.exec();
+      }
+    } catch (error) {}
+  }
+);
