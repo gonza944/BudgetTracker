@@ -3,6 +3,7 @@
 import { Redis } from "@upstash/redis";
 import { cache } from "react";
 import { PROJECTNAME } from "./page";
+import { getDateInScoreFormat } from "./utils";
 
 export interface ProjectBudget {
   budget: number;
@@ -39,12 +40,16 @@ export const getExpensesIndexes = cache(
 
 export const getExpenses = cache(
   async (projectName: string, fromDate: number, toDate: number) => {
+    console.log(projectName, fromDate, toDate);
+
     const expensesIndexes: string[] = await redis.zrange(
       projectName,
       fromDate,
       toDate,
       { byScore: true }
     );
+
+    console.log(expensesIndexes);
 
     return await Promise.all(
       expensesIndexes.map(
@@ -94,28 +99,28 @@ export const createNewExpense = cache(
         rawFormData.category
       ) {
         const tx = redis.multi();
-        const year = expenseDate.getFullYear(),
-          month = expenseDate.getMonth() + 1,
-          date = expenseDate.getDate();
+        const theFollowingDay = new Date(expenseDate);
+        theFollowingDay.setDate(theFollowingDay.getDate() + 1);
+        const todayInScoreFormat = getDateInScoreFormat(expenseDate);
+        const tomorrowInScoreFormat = getDateInScoreFormat(theFollowingDay);
         const expenseOfDayNumber = await redis.zcount(
           `${PROJECTNAME}:expenses`,
-          Number.parseInt(`${year}${month}${date}1`),
-          Number.parseInt(`${year}${month}${date + 1}1`)
-        );
+          todayInScoreFormat,
+          tomorrowInScoreFormat
+        ).then((count) => count + 1).then((count) => count.toString().padStart(4, "0"));
 
         tx.zadd(`${PROJECTNAME}:expenses`, {
           score: Number.parseInt(
-            `${year}${month}${date}${expenseOfDayNumber + 1}`
+            `${todayInScoreFormat}${expenseOfDayNumber }`
           ),
-          member: `expense:${year}${month}${date}${expenseOfDayNumber + 1}`,
+          member: `expense:${todayInScoreFormat}${expenseOfDayNumber}`,
         });
         tx.hset(
-          `expense:${year}${month}${date}${expenseOfDayNumber + 1}`,
+          `expense:${todayInScoreFormat}${expenseOfDayNumber}`,
           rawFormData
         );
         tx.hincrby(PROJECTNAME, "total_expenses", rawFormData.amount);
-        tx.sadd("categories", rawFormData.category); 
-
+        tx.sadd("categories", rawFormData.category);
 
         await tx.exec();
       }

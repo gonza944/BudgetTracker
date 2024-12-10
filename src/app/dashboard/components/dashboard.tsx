@@ -10,6 +10,12 @@ import Balance from "./balance";
 import DatePicker from "./datePicker";
 import ExpensesList from "./expensesList";
 import OverallBalance from "./overallBalance";
+import {
+  FIRSTEXPENSE,
+  getDateInScoreFormat,
+  getFirstDayOfTheFollowingMonthInScoreFormat,
+  getFirstDayOfTheMonthInScoreFormat,
+} from "../utils";
 interface DashboardProps {
   project: ProjectBudget | null;
   expenses: Expense[];
@@ -38,14 +44,19 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   useEffect(() => {
     (async () => {
-      const year = selectedDate.getFullYear(),
-        month = selectedDate.getMonth() + 1,
-        date = selectedDate.getDate();
+      const theFollowingDay = new Date(selectedDate);
+      theFollowingDay.setDate(theFollowingDay.getDate() + 1);
+      const selectedDateInScoreFormat = getDateInScoreFormat(selectedDate);
+      const theFollowingDayInScoreFormat = getDateInScoreFormat(selectedDate);
+      const selectedDateFirstDayOfTheMonth =
+        getFirstDayOfTheMonthInScoreFormat(selectedDate);
+      const selectedDateFirstDayOfTheFollowingMonth =
+        getFirstDayOfTheFollowingMonthInScoreFormat(selectedDate);
 
       const newExpenses = await getExpenses(
         projectName,
-        Number.parseInt(`${year}${month}${date}1`),
-        Number.parseInt(`${year}${month}${date + 1}1`)
+        Number.parseInt(`${selectedDateInScoreFormat}${FIRSTEXPENSE}`),
+        Number.parseInt(`${theFollowingDayInScoreFormat}${FIRSTEXPENSE}`)
       );
       setexpenses(newExpenses);
       const dailyExpenses = newExpenses.reduce(
@@ -56,12 +67,8 @@ const Dashboard: React.FC<DashboardProps> = ({
       if (previousValue.getMonth() !== selectedDate.getMonth()) {
         const budgetInAMonth = await getMontlyBudget(
           project!,
-          Number.parseInt(
-            `${year}${month}11`
-          ),
-          Number.parseInt(
-            `${year}${month +1}11`
-          )
+          selectedDateFirstDayOfTheMonth,
+          selectedDateFirstDayOfTheFollowingMonth
         );
         setmonthlyBudget(budgetInAMonth);
       }
@@ -81,7 +88,11 @@ const Dashboard: React.FC<DashboardProps> = ({
         />
       </div>
       <div className="col-start-3 col-span-3 max-md:col-start-1 max-md:col-span-1 row-span-10 flex justify-between max-md:justify-center">
-        <ExpensesList expenses={expenses} dailyBudget={project?.dailyBudget} selectedDate={selectedDate}/>
+        <ExpensesList
+          expenses={expenses}
+          dailyBudget={project?.dailyBudget}
+          selectedDate={selectedDate}
+        />
       </div>
       <div className="col-start-2 max-md:col-start-1 col-span-4 max-md:col-span-1 row-span-1 flex justify-between max-md:flex-col max-md:items-center">
         <Balance
