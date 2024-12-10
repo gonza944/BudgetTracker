@@ -39,18 +39,14 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   useEffect(() => {
     (async () => {
+      const year = selectedDate.getFullYear(),
+        month = selectedDate.getMonth() + 1,
+        date = selectedDate.getDate();
+
       const newExpenses = await getExpenses(
         projectName,
-        Number.parseInt(
-          `${selectedDate.getFullYear()}${
-            selectedDate.getMonth() + 1
-          }${selectedDate.getDate()}1`
-        ),
-        Number.parseInt(
-          `${selectedDate.getFullYear()}${selectedDate.getMonth() + 1}${
-            selectedDate.getDate() + 1
-          }1`
-        )
+        Number.parseInt(`${year}${month}${date}1`),
+        Number.parseInt(`${year}${month}${date + 1}1`)
       );
       setexpenses(newExpenses);
       const dailyExpenses = newExpenses.reduce(
@@ -62,12 +58,10 @@ const Dashboard: React.FC<DashboardProps> = ({
         const budgetInAMonth = await getMontlyBudget(
           project!,
           Number.parseInt(
-            `${selectedDate.getFullYear()}${
-              selectedDate.getMonth() + 1
-            }11`
+            `${year}${month}11`
           ),
           Number.parseInt(
-            `${selectedDate.getFullYear()}${selectedDate.getMonth() + 2}11`
+            `${year}${month +1}11`
           )
         );
         setmonthlyBudget(budgetInAMonth);
