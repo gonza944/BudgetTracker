@@ -3,7 +3,7 @@
 import { Redis } from "@upstash/redis";
 import { cache } from "react";
 import { PROJECTNAME } from "./page";
-import { getDateInScoreFormat } from "./utils";
+import { FIRSTEXPENSE, getDateInScoreFormat } from "./utils";
 
 export interface ProjectBudget {
   budget: number;
@@ -40,7 +40,6 @@ export const getExpensesIndexes = cache(
 
 export const getExpenses = cache(
   async (projectName: string, fromDate: number, toDate: number) => {
-
     const expensesIndexes: string[] = await redis.zrange(
       projectName,
       fromDate,
@@ -100,16 +99,17 @@ export const createNewExpense = cache(
         theFollowingDay.setDate(theFollowingDay.getDate() + 1);
         const todayInScoreFormat = getDateInScoreFormat(expenseDate);
         const tomorrowInScoreFormat = getDateInScoreFormat(theFollowingDay);
-        const expenseOfDayNumber = await redis.zcount(
-          `${PROJECTNAME}:expenses`,
-          todayInScoreFormat,
-          tomorrowInScoreFormat
-        ).then((count) => count + 1).then((count) => count.toString().padStart(4, "0"));
+        const expenseOfDayNumber = await redis
+          .zcount(
+            `${PROJECTNAME}:expenses`,
+            Number.parseInt(`${todayInScoreFormat}${FIRSTEXPENSE}`),
+            Number.parseInt(`${tomorrowInScoreFormat}${FIRSTEXPENSE}`)
+          )
+          .then((count) => count + 1)
+          .then((count) => count.toString().padStart(4, "0"));
 
         tx.zadd(`${PROJECTNAME}:expenses`, {
-          score: Number.parseInt(
-            `${todayInScoreFormat}${expenseOfDayNumber }`
-          ),
+          score: Number.parseInt(`${todayInScoreFormat}${expenseOfDayNumber}`),
           member: `expense:${todayInScoreFormat}${expenseOfDayNumber}`,
         });
         tx.hset(

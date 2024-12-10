@@ -38,43 +38,52 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [remainingBudget, setremainingBudget] = useState(
     initialRemainingBudget
   );
+  const [newExpenseAdded, setNewExpenseAdded] = useState(false);
   const handleOndateChanged = (date: Date) => {
     setselectedDate(date);
   };
 
-  useEffect(() => {
-    (async () => {
-      const theFollowingDay = new Date(selectedDate);
-      theFollowingDay.setDate(theFollowingDay.getDate() + 1);
-      const selectedDateInScoreFormat = getDateInScoreFormat(selectedDate);
-      const theFollowingDayInScoreFormat = getDateInScoreFormat(selectedDate);
-      const selectedDateFirstDayOfTheMonth =
-        getFirstDayOfTheMonthInScoreFormat(selectedDate);
-      const selectedDateFirstDayOfTheFollowingMonth =
-        getFirstDayOfTheFollowingMonthInScoreFormat(selectedDate);
+  const fetchNewExpenses = async () => {
+    const theFollowingDay = new Date(selectedDate);
+    theFollowingDay.setDate(theFollowingDay.getDate() + 1);
+    const selectedDateInScoreFormat = getDateInScoreFormat(selectedDate);
+    const theFollowingDayInScoreFormat = getDateInScoreFormat(theFollowingDay);
+    const selectedDateFirstDayOfTheMonth =
+      getFirstDayOfTheMonthInScoreFormat(selectedDate);
+    const selectedDateFirstDayOfTheFollowingMonth =
+      getFirstDayOfTheFollowingMonthInScoreFormat(selectedDate);
 
-      const newExpenses = await getExpenses(
-        projectName,
-        Number.parseInt(`${selectedDateInScoreFormat}${FIRSTEXPENSE}`),
-        Number.parseInt(`${theFollowingDayInScoreFormat}${FIRSTEXPENSE}`)
+    const newExpenses = await getExpenses(
+      projectName,
+      Number.parseInt(`${selectedDateInScoreFormat}${FIRSTEXPENSE}`),
+      Number.parseInt(`${theFollowingDayInScoreFormat}${FIRSTEXPENSE}`)
+    );
+    setexpenses(newExpenses);
+    const dailyExpenses = newExpenses.reduce(
+      (acc, expense) => acc + expense.amount,
+      0
+    );
+    setremainingBudget(project?.dailyBudget! - dailyExpenses);
+    if (previousValue.getMonth() !== selectedDate.getMonth()) {
+      const budgetInAMonth = await getMontlyBudget(
+        project!,
+        selectedDateFirstDayOfTheMonth,
+        selectedDateFirstDayOfTheFollowingMonth
       );
-      setexpenses(newExpenses);
-      const dailyExpenses = newExpenses.reduce(
-        (acc, expense) => acc + expense.amount,
-        0
-      );
-      setremainingBudget(project?.dailyBudget! - dailyExpenses);
-      if (previousValue.getMonth() !== selectedDate.getMonth()) {
-        const budgetInAMonth = await getMontlyBudget(
-          project!,
-          selectedDateFirstDayOfTheMonth,
-          selectedDateFirstDayOfTheFollowingMonth
-        );
-        setmonthlyBudget(budgetInAMonth);
-      }
-      setpreviousValue(selectedDate);
-    })();
+      setmonthlyBudget(budgetInAMonth);
+    }
+    setpreviousValue(selectedDate);
+  };
+
+  useEffect(() => {
+    fetchNewExpenses();
   }, [selectedDate]);
+  useEffect(() => {
+    if (newExpenseAdded) {
+      fetchNewExpenses();
+      setNewExpenseAdded(false);
+    }
+  }, [newExpenseAdded]);
 
   return (
     <div className=" grid flex-col grid-cols-6 gap-6 max-md:grid-cols-1">

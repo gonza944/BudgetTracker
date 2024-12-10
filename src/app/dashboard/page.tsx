@@ -15,7 +15,7 @@ const DashboardPage: React.FC = async () => {
   const theFollowingDay = new Date(today);
   theFollowingDay.setDate(theFollowingDay.getDate() + 1);
   const selectedDateInScoreFormat = getDateInScoreFormat(today);
-  const theFollowingDayInScoreFormat = getDateInScoreFormat(today);
+  const theFollowingDayInScoreFormat = getDateInScoreFormat(theFollowingDay);
   const selectedDateFirstDayOfTheMonth =
     getFirstDayOfTheMonthInScoreFormat(today);
   const selectedDateFirstDayOfTheFollowingMonth =
