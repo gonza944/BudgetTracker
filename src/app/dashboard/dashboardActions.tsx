@@ -2,8 +2,8 @@
 
 import { Redis } from "@upstash/redis";
 import { cache } from "react";
-import { PROJECTNAME } from "./page";
 import { FIRSTEXPENSE, getDateInScoreFormat } from "./utils";
+import { initialState } from "../providers/generalReducer";
 
 export interface ProjectBudget {
   budget: number;
@@ -40,9 +40,9 @@ export const getExpensesIndexes = cache(
 );
 
 export const getExpenses = cache(
-  async (projectName: string, fromDate: number, toDate: number) => {
+  async (expensesName: string, fromDate: number, toDate: number) => {
     const expensesIndexes: string[] = await getExpensesIndexes(
-      projectName,
+      expensesName,
       fromDate,
       toDate
     );
@@ -51,18 +51,21 @@ export const getExpenses = cache(
       expensesIndexes.map(
         (name) => redis.hgetall(name) as Promise<Expense | null>
       )
-    ).then((expenses) => expenses.map((e, i) => ({...e, index: expensesIndexes[i]})))
-    .then(
-      (expenses) =>
-        expenses.filter((expense) => expense?.amount !== null) as Expense[]
-    );
+    )
+      .then((expenses) =>
+        expenses.map((e, i) => ({ ...e, index: expensesIndexes[i] }))
+      )
+      .then(
+        (expenses) =>
+          expenses.filter((expense) => expense?.amount !== null) as Expense[]
+      );
   }
 );
 
 export const monthlyBudget = cache(
   async (project: ProjectBudget, fromDate: number, toDate: number) => {
     const montlyExpensesIndexes = await getExpensesIndexes(
-      `${PROJECTNAME}:expenses`,
+      `${initialState.currentProject}:expenses`,
       fromDate,
       toDate
     );
@@ -103,14 +106,14 @@ export const createNewExpense = cache(
         const tomorrowInScoreFormat = getDateInScoreFormat(theFollowingDay);
         const expenseOfDayNumber = await redis
           .zcount(
-            `${PROJECTNAME}:expenses`,
+            `${initialState.currentProject}:expenses`,
             Number.parseInt(`${todayInScoreFormat}${FIRSTEXPENSE}`),
             Number.parseInt(`${tomorrowInScoreFormat}${FIRSTEXPENSE}`)
           )
           .then((count) => count + 1)
           .then((count) => count.toString().padStart(4, "0"));
 
-        tx.zadd(`${PROJECTNAME}:expenses`, {
+        tx.zadd(`${initialState.currentProject}:expenses`, {
           score: Number.parseInt(`${todayInScoreFormat}${expenseOfDayNumber}`),
           member: `expense:${todayInScoreFormat}${expenseOfDayNumber}`,
         });
@@ -118,7 +121,11 @@ export const createNewExpense = cache(
           `expense:${todayInScoreFormat}${expenseOfDayNumber}`,
           rawFormData
         );
-        tx.hincrby(PROJECTNAME, "total_expenses", rawFormData.amount);
+        tx.hincrby(
+          initialState.currentProject,
+          "total_expenses",
+          rawFormData.amount
+        );
         tx.sadd("categories", rawFormData.category);
 
         await tx.exec();
@@ -130,8 +137,8 @@ export const createNewExpense = cache(
 export const removeExpense = cache(async (expense: Expense) => {
   const tx = redis.multi();
   tx.hdel(expense.index, "description", "category", "amount");
-  tx.zrem(`${PROJECTNAME}:expenses`, expense.index);
-  tx.hincrby(PROJECTNAME, "total_expenses", -expense.amount);
-  
+  tx.zrem(`${initialState.currentProject}:expenses`, expense.index);
+  tx.hincrby(initialState.currentProject, "total_expenses", -expense.amount);
+
   await tx.exec();
 });

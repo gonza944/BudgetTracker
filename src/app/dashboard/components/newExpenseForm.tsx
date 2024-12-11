@@ -36,6 +36,7 @@ const NewExpenseForm: React.FC<NewExpenseFormProps> = ({ onSave }) => {
           name="amount"
           placeholder="Amount"
           type="number"
+          step="0.01"
           className=" bg-neutralBackgroundColor mt-3 block w-full text-2xl text-neutralBackgroundColorInverted focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2"
         />
       </Field>
