@@ -10,7 +10,7 @@ export const getFirstDayOfTheMonthInScoreFormat = (selectedDate: Date) => {
   const year = selectedDate.getFullYear(),
     month = (selectedDate.getMonth() + 1).toString().padStart(2, "0");
 
-  return Number.parseInt(`${year}${month}010001`);
+  return Number.parseInt(`${year}${month}01${FIRSTEXPENSE}`);
 };
 
 export const getFirstDayOfTheFollowingMonthInScoreFormat = (
@@ -26,4 +26,4 @@ export const getFirstDayOfTheFollowingMonthInScoreFormat = (
   return Number.parseInt(`${year}${month}01${FIRSTEXPENSE}`);
 };
 
-export const FIRSTEXPENSE = '0001';
+export const FIRSTEXPENSE = '0000';
