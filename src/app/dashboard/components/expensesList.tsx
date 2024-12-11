@@ -1,9 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { createNewExpense, Expense, removeExpense } from "../dashboardActions";
 import AddNewExpenseButton from "./addNewExpenseButton";
 import NewExpenseForm from "./newExpenseForm";
 import { Button } from "@headlessui/react";
+import { generalContext } from "@/app/providers/context";
 
 interface Expenses {
   expenses: Expense[];
@@ -16,6 +17,9 @@ const ExpensesList: React.FC<Expenses> = ({
   dailyBudget,
   selectedDate,
 }) => {
+  const { dispatch } = useContext(generalContext);
+
+
   const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<number | null>(null);
 
@@ -28,11 +32,13 @@ const ExpensesList: React.FC<Expenses> = ({
   };
   const handleRemoveExpense = (index: number) => async () => {
     await removeExpense(expenses[index]);
+    dispatch({ type: "TRIGGER_EXPENSES_RELOAD" });
     setSelectedExpense(null);
   };
 
   const handleOnAddingNewExpense = async (formData: FormData) => {
     await createNewExpense(formData, selectedDate);
+    dispatch({ type: "TRIGGER_EXPENSES_RELOAD" });
     setIsAddingOrEditing(false);
   };
 

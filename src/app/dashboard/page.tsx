@@ -1,3 +1,4 @@
+import { initialState } from "../providers/generalReducer";
 import Dashboard from "./components/dashboard";
 import { getExpenses, getProject, monthlyBudget } from "./dashboardActions";
 import {
@@ -7,22 +8,19 @@ import {
   getFirstDayOfTheMonthInScoreFormat,
 } from "./utils";
 
-export const PROJECTNAME = "project:viaje-europa-2024";
-
 const DashboardPage: React.FC = async () => {
-  const today = new Date();
-  const project = await getProject(PROJECTNAME);
-  const theFollowingDay = new Date(today);
+  const project = await getProject(initialState.currentProject);
+  const theFollowingDay = new Date(initialState.selectedExpensesDay);
   theFollowingDay.setDate(theFollowingDay.getDate() + 1);
-  const selectedDateInScoreFormat = getDateInScoreFormat(today);
+  const selectedDateInScoreFormat = getDateInScoreFormat(initialState.selectedExpensesDay);
   const theFollowingDayInScoreFormat = getDateInScoreFormat(theFollowingDay);
   const selectedDateFirstDayOfTheMonth =
-    getFirstDayOfTheMonthInScoreFormat(today);
+    getFirstDayOfTheMonthInScoreFormat(initialState.selectedExpensesDay);
   const selectedDateFirstDayOfTheFollowingMonth =
-    getFirstDayOfTheFollowingMonthInScoreFormat(today);
+    getFirstDayOfTheFollowingMonthInScoreFormat(initialState.selectedExpensesDay);
 
   const expenses = await getExpenses(
-    `${PROJECTNAME}:expenses`,
+    `${initialState.currentProject}:expenses`,
     Number.parseInt(`${selectedDateInScoreFormat}${FIRSTEXPENSE}`),
     Number.parseInt(`${theFollowingDayInScoreFormat}${FIRSTEXPENSE}`)
   );
@@ -43,7 +41,6 @@ const DashboardPage: React.FC = async () => {
       expenses={expenses}
       monthlyBudget={budgetInAMonth}
       remainingBudget={project?.dailyBudget! - dailyExpenses}
-      projectName={`${PROJECTNAME}:expenses`}
     />
   );
 };
