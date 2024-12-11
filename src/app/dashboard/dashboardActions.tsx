@@ -16,6 +16,7 @@ export interface Expense {
   category: string;
   description: string;
   amount: number;
+  index: string;
 }
 
 const redis = Redis.fromEnv();
@@ -40,19 +41,20 @@ export const getExpensesIndexes = cache(
 
 export const getExpenses = cache(
   async (projectName: string, fromDate: number, toDate: number) => {
-    const expensesIndexes: string[] = await redis.zrange(
+    const expensesIndexes: string[] = await getExpensesIndexes(
       projectName,
       fromDate,
-      toDate,
-      { byScore: true }
+      toDate
     );
 
     return await Promise.all(
       expensesIndexes.map(
         (name) => redis.hgetall(name) as Promise<Expense | null>
       )
-    ).then(
-      (expenses) => expenses.filter((expense) => expense !== null) as Expense[]
+    ).then((expenses) => expenses.map((e, i) => ({...e, index: expensesIndexes[i]})))
+    .then(
+      (expenses) =>
+        expenses.filter((expense) => expense?.amount !== null) as Expense[]
     );
   }
 );
@@ -124,3 +126,12 @@ export const createNewExpense = cache(
     } catch (error) {}
   }
 );
+
+export const removeExpense = cache(async (expense: Expense) => {
+  const tx = redis.multi();
+  tx.hdel(expense.index, "description", "category", "amount");
+  tx.zrem(`${PROJECTNAME}:expenses`, expense.index);
+  tx.hincrby(PROJECTNAME, "total_expenses", -expense.amount);
+  
+  await tx.exec();
+});
