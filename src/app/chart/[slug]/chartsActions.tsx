@@ -6,58 +6,78 @@ import {
   getFirstDayOfTheMonthInScoreFormat,
 } from "@/app/dashboard/utils";
 import { initialState } from "@/app/providers/generalReducer";
-import { RemainingBudgetChartDataProps } from "./components/remainingBudget";
+import {
+  RemainingBudgetChartDataProps,
+} from "./components/remainingBudget";
+
+type MakePropRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
 export const getSelectedMonthExpensesGroupedByDay = async (
   selectedDate: Date
-) => {
+): Promise<RemainingBudgetChartDataProps[]> => {
   const project = await getProject(initialState.currentProject);
   const currentMonthlyBudget = project?.dailyBudget! * 30;
   const selectedDateFirstDayOfTheMonth =
     getFirstDayOfTheMonthInScoreFormat(selectedDate);
   const selectedDateFirstDayOfTheFollowingMonth =
     getFirstDayOfTheFollowingMonthInScoreFormat(selectedDate);
+  const daysInMonth = new Date(
+    selectedDate.getFullYear(),
+    selectedDate.getMonth() + 1,
+    0
+  ).getDate();
+  let remainingBudget = currentMonthlyBudget;
+
+  const datesArray = Array.from({ length: daysInMonth }, (_, i) => {
+    const date = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      i + 1
+    );
+    return { name: date.toLocaleDateString(), date };
+  });
 
   return await getExpenses(
     `${initialState.currentProject}:expenses`,
     selectedDateFirstDayOfTheMonth,
     selectedDateFirstDayOfTheFollowingMonth
-  ).then((expensesIndexes) =>
-    expensesIndexes.reduce(
-      (acc, expense) => {
-        const dateInStringFormat = expense.index.substring(8, 16);
-        const date = new Date(
-          Number.parseInt(dateInStringFormat.substring(0, 4)),
-          Number.parseInt(dateInStringFormat.substring(4, 6)) - 1,
-          Number.parseInt(dateInStringFormat.substring(6, 8))
-        );
+  )
+    .then((expensesIndexes) =>
+      expensesIndexes.reduce(
+        (acc, expense) => {
+          const dateInStringFormat = expense.index.substring(8, 16);
+          const expenseKey = Number.parseInt(
+            dateInStringFormat.substring(6, 8)
+          );
+          const correspondingData = acc[expenseKey];
+          remainingBudget -= expense.amount;
+          correspondingData.remainingBudget = remainingBudget;
 
-        const alreadyExists = acc.some((e) => {
-          const match =
-            e.date?.toLocaleDateString() === date.toLocaleDateString();
-          if (match) {
-            e.remainingBudget -= expense.amount;
-          }
-          return match;
-        });
-
-        if (!alreadyExists) {
-          acc.push({
-            date,
-            name: date.toLocaleDateString(),
-            remainingBudget:
-              acc[acc.length - 1].remainingBudget - expense.amount,
-          });
-        }
-        return acc;
-      },
-      [
-        {
-          name: "",
-          remainingBudget: currentMonthlyBudget,
-          controlBudget: currentMonthlyBudget,
+          return acc;
         },
-      ] as RemainingBudgetChartDataProps[]
+        [
+          {
+            name: "",
+            remainingBudget: currentMonthlyBudget,
+            controlBudget: currentMonthlyBudget,
+          },
+          ...datesArray,
+        ] as MakePropRequired<
+          RemainingBudgetChartDataProps,
+          "remainingBudget"
+        >[]
+      )
     )
-  );
+    .then((chartData: RemainingBudgetChartDataProps[]) =>
+      chartData.map((data, index) => {
+        !data.remainingBudget && (data.remainingBudget = chartData[index -1].remainingBudget);
+        
+        return data;
+      })
+    )
+    .then((chartData: RemainingBudgetChartDataProps[]) => {
+      chartData[chartData.length - 1].controlBudget = 0;
+
+      return chartData;
+    });
 };

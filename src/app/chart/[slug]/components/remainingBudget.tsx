@@ -5,6 +5,7 @@ import {
   Legend,
   Line,
   LineChart,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -13,7 +14,7 @@ import {
 
 export interface RemainingBudgetChartDataProps {
   name: string;
-  remainingBudget: number;
+  remainingBudget?: number;
   controlBudget?: number;
   date?: Date;
 }
@@ -43,8 +44,23 @@ export default function RemainingBudget({ data }: IRemainingBudgetProps) {
         <XAxis dataKey="name" />
         <YAxis />
         <Tooltip />
-        <Legend />
-        <Line type="monotone" dataKey="remainingBudget" stroke="#828c77" strokeWidth={2} />
+        <ReferenceLine
+          stroke="#f2a444"
+          strokeDasharray="3 3"
+          segment={[
+            { x:'', y: data[0].controlBudget },
+            {
+              x: data[data.length - 1].name,
+              y: 0,
+            },
+          ]}
+        />
+        <Line
+          type="monotone"
+          dataKey="remainingBudget"
+          stroke="#828c77"
+          strokeWidth={2}
+        />
       </LineChart>
     </ResponsiveContainer>
   );
