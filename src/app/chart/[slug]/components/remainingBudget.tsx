@@ -1,8 +1,13 @@
 "use client";
 
+import { generalContext } from "@/app/providers/context";
+import {
+  getSelectedExpensesDay,
+  getTriggerExpensesReload,
+} from "@/app/providers/selectors";
+import { use, useEffect, useState } from "react";
 import {
   CartesianGrid,
-  Legend,
   Line,
   LineChart,
   ReferenceLine,
@@ -11,6 +16,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { getSelectedMonthExpensesGroupedByDay } from "../chartsActions";
 
 export interface RemainingBudgetChartDataProps {
   name: string;
@@ -23,10 +29,28 @@ interface IRemainingBudgetProps {
   data: RemainingBudgetChartDataProps[];
 }
 
-export default function RemainingBudget({ data }: IRemainingBudgetProps) {
-  /* const { context, dispatch } = use(generalContext);
-    const selectedExpensesDay = getSelectedExpensesDay(context);
-    const shouldReloadExpenses = getTriggerExpensesReload(context); */
+export default function RemainingBudget({
+  data: initialData,
+}: IRemainingBudgetProps) {
+  const { context, dispatch } = use(generalContext);
+  const selectedExpensesDay = getSelectedExpensesDay(context);
+  const shouldReloadExpenses = getTriggerExpensesReload(context);
+  const [previousDate, setPreviousDate] = useState(selectedExpensesDay);
+
+  useEffect(() => {
+    if (shouldReloadExpenses && previousDate !== selectedExpensesDay) {
+      (async () => {
+        const data = await getSelectedMonthExpensesGroupedByDay(
+          selectedExpensesDay
+        );
+        setData(data);
+        dispatch({ type: "EXPENSES_RELOADED" });
+        setPreviousDate(selectedExpensesDay);
+      })();
+    }
+  }, [shouldReloadExpenses]);
+
+  const [data, setData] = useState(initialData);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -48,7 +72,7 @@ export default function RemainingBudget({ data }: IRemainingBudgetProps) {
           stroke="#f2a444"
           strokeDasharray="3 3"
           segment={[
-            { x:'', y: data[0].controlBudget },
+            { x: "", y: data[0].controlBudget },
             {
               x: data[data.length - 1].name,
               y: 0,
@@ -60,6 +84,8 @@ export default function RemainingBudget({ data }: IRemainingBudgetProps) {
           dataKey="remainingBudget"
           stroke="#828c77"
           strokeWidth={2}
+          connectNulls
+          name="Remaining Budget"
         />
       </LineChart>
     </ResponsiveContainer>

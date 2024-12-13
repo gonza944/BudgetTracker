@@ -6,9 +6,7 @@ import {
   getFirstDayOfTheMonthInScoreFormat,
 } from "@/app/dashboard/utils";
 import { initialState } from "@/app/providers/generalReducer";
-import {
-  RemainingBudgetChartDataProps,
-} from "./components/remainingBudget";
+import { RemainingBudgetChartDataProps } from "./components/remainingBudget";
 
 type MakePropRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
@@ -67,13 +65,6 @@ export const getSelectedMonthExpensesGroupedByDay = async (
           "remainingBudget"
         >[]
       )
-    )
-    .then((chartData: RemainingBudgetChartDataProps[]) =>
-      chartData.map((data, index) => {
-        !data.remainingBudget && (data.remainingBudget = chartData[index -1].remainingBudget);
-        
-        return data;
-      })
     )
     .then((chartData: RemainingBudgetChartDataProps[]) => {
       chartData[chartData.length - 1].controlBudget = 0;
