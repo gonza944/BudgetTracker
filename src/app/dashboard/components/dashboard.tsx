@@ -1,7 +1,8 @@
 "use client";
 import { generalContext } from "@/app/providers/context";
 import { initialState } from "@/app/providers/generalReducer";
-import { useContext, useEffect, useState } from "react";
+import { getSelectedExpensesDay, getTriggerExpensesReload } from "@/app/providers/selectors";
+import { use, useEffect, useState } from "react";
 import {
   Expense,
   getExpenses,
@@ -18,7 +19,6 @@ import Balance from "./balance";
 import DatePicker from "./datePicker";
 import ExpensesList from "./expensesList";
 import OverallBalance from "./overallBalance";
-import { getSelectedExpensesDay } from "@/app/providers/selectors";
 interface DashboardProps {
   project: ProjectBudget | null;
   expenses: Expense[];
@@ -32,9 +32,9 @@ const Dashboard: React.FC<DashboardProps> = ({
   remainingBudget: initialRemainingBudget,
   monthlyBudget: initialMonthlyBudget,
 }) => {
-  const { context, dispatch } = useContext(generalContext);
+  const { context, dispatch } = use(generalContext);
   const selectedExpensesDay = getSelectedExpensesDay(context);
-  const shouldReloadExpenses = context.triggerExpensesReload;
+  const shouldReloadExpenses = getTriggerExpensesReload(context);
 
   const [previousValue, setpreviousValue] = useState(selectedExpensesDay);
   const [expenses, setexpenses] = useState(initialExpenses);
