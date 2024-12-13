@@ -2,6 +2,8 @@ import DashboardPage from "./dashboard/page";
 
 export default function Home() {
   return (
-      <DashboardPage />
+      <div>
+        something
+      </div>
   );
 }

@@ -1,23 +1,28 @@
-import { initialState } from "../providers/generalReducer";
-import Dashboard from "./@expenses/components/dashboard";
-import { getExpenses, getProject, monthlyBudget } from "./@expenses/dashboardActions";
+import { initialState } from "@/app/providers/generalReducer";
+import { getProject, getExpenses, monthlyBudget } from "./dashboardActions";
 import {
-  FIRSTEXPENSE,
   getDateInScoreFormat,
-  getFirstDayOfTheFollowingMonthInScoreFormat,
   getFirstDayOfTheMonthInScoreFormat,
-} from "./utils";
+  getFirstDayOfTheFollowingMonthInScoreFormat,
+  FIRSTEXPENSE,
+} from "../utils";
+import Dashboard from "./components/dashboard";
 
 const DashboardPage: React.FC = async () => {
   const project = await getProject(initialState.currentProject);
   const theFollowingDay = new Date(initialState.selectedExpensesDay);
   theFollowingDay.setDate(theFollowingDay.getDate() + 1);
-  const selectedDateInScoreFormat = getDateInScoreFormat(initialState.selectedExpensesDay);
+  const selectedDateInScoreFormat = getDateInScoreFormat(
+    initialState.selectedExpensesDay
+  );
   const theFollowingDayInScoreFormat = getDateInScoreFormat(theFollowingDay);
-  const selectedDateFirstDayOfTheMonth =
-    getFirstDayOfTheMonthInScoreFormat(initialState.selectedExpensesDay);
+  const selectedDateFirstDayOfTheMonth = getFirstDayOfTheMonthInScoreFormat(
+    initialState.selectedExpensesDay
+  );
   const selectedDateFirstDayOfTheFollowingMonth =
-    getFirstDayOfTheFollowingMonthInScoreFormat(initialState.selectedExpensesDay);
+    getFirstDayOfTheFollowingMonthInScoreFormat(
+      initialState.selectedExpensesDay
+    );
 
   const expenses = await getExpenses(
     `${initialState.currentProject}:expenses`,

@@ -32,6 +32,8 @@ interface IRemainingBudgetProps {
 export default function RemainingBudget({
   data: initialData,
 }: IRemainingBudgetProps) {
+  console.log(initialData);
+
   const { context, dispatch } = use(generalContext);
   const selectedExpensesDay = getSelectedExpensesDay(context);
   const shouldReloadExpenses = getTriggerExpensesReload(context);

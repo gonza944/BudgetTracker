@@ -2,9 +2,9 @@
 import { generalContext } from "@/app/providers/context";
 import { Button } from "@headlessui/react";
 import { use, useState } from "react";
-import { createNewExpense, Expense, removeExpense } from "../dashboardActions";
 import AddNewExpenseButton from "./addNewExpenseButton";
 import NewExpenseForm from "./newExpenseForm";
+import { createNewExpense, Expense, removeExpense } from "../dashboardActions";
 
 interface Expenses {
   expenses: Expense[];

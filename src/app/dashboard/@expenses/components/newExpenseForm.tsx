@@ -1,4 +1,4 @@
-import { Field, Label, Description, Input } from "@headlessui/react";
+import { Field, Input } from "@headlessui/react";
 import SubmitButton from "./submitButton";
 
 interface NewExpenseFormProps {

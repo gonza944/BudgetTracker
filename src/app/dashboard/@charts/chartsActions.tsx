@@ -1,6 +1,6 @@
 "use server";
 
-import { getExpenses, getProject } from "@/app/dashboard/dashboardActions";
+import { getExpenses, getProject } from "@/app/dashboard/@expenses/dashboardActions";
 import {
   getFirstDayOfTheFollowingMonthInScoreFormat,
   getFirstDayOfTheMonthInScoreFormat,

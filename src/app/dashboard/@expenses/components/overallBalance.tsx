@@ -1,4 +1,3 @@
-import { Redis } from "@upstash/redis";
 
 interface OverallBalanceProps {
   budget?: number;

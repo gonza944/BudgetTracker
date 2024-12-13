@@ -3,18 +3,9 @@ import { generalContext } from "@/app/providers/context";
 import { initialState } from "@/app/providers/generalReducer";
 import { getSelectedExpensesDay, getTriggerExpensesReload } from "@/app/providers/selectors";
 import { use, useEffect, useState } from "react";
-import {
-  Expense,
-  getExpenses,
-  monthlyBudget as getMontlyBudget,
-  ProjectBudget,
-} from "../dashboardActions";
-import {
-  FIRSTEXPENSE,
-  getDateInScoreFormat,
-  getFirstDayOfTheFollowingMonthInScoreFormat,
-  getFirstDayOfTheMonthInScoreFormat,
-} from "../utils";
+
+import { FIRSTEXPENSE, getDateInScoreFormat, getFirstDayOfTheFollowingMonthInScoreFormat, getFirstDayOfTheMonthInScoreFormat } from "../../utils";
+import { Expense, getExpenses, ProjectBudget, monthlyBudget as getMontlyBudget } from "../dashboardActions";
 import Balance from "./balance";
 import DatePicker from "./datePicker";
 import ExpensesList from "./expensesList";
