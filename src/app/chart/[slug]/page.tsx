@@ -1,18 +1,8 @@
-import {
-  getExpenses,
-  getProject,
-  monthlyBudget,
-} from "@/app/dashboard/dashboardActions";
-import {
-  FIRSTEXPENSE,
-  getFirstDayOfTheFollowingMonthInScoreFormat,
-  getFirstDayOfTheMonthInScoreFormat,
-} from "@/app/dashboard/utils";
 import { initialState } from "@/app/providers/generalReducer";
+import { getSelectedMonthExpensesGroupedByDay } from "./chartsActions";
 import RemainingBudget, {
   RemainingBudgetChartDataProps,
 } from "./components/remainingBudget";
-import { getSelectedMonthExpensesGroupedByDay } from "./chartsActions";
 
 export const CHARTTYPES = {
   monthlyRemainingBudget: "monthlyRemainingBudget",
@@ -31,7 +21,6 @@ export default async function Page({
   };
 
   const chartData = await calculateChartData(initialState.selectedExpensesDay);
-  console.log(chartData);
 
   return slug === CHARTTYPES.monthlyRemainingBudget ? (
     <RemainingBudget data={chartData} />

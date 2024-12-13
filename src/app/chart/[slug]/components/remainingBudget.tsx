@@ -14,7 +14,8 @@ import {
 export interface RemainingBudgetChartDataProps {
   name: string;
   remainingBudget: number;
-  slug: string;
+  controlBudget?: number;
+  date?: Date;
 }
 
 interface IRemainingBudgetProps {
@@ -43,7 +44,7 @@ export default function RemainingBudget({ data }: IRemainingBudgetProps) {
         <YAxis />
         <Tooltip />
         <Legend />
-        <Line type="monotone" dataKey="remainingBudget" stroke="#82ca9d" />
+        <Line type="monotone" dataKey="remainingBudget" stroke="#828c77" strokeWidth={2} />
       </LineChart>
     </ResponsiveContainer>
   );

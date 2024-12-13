@@ -1,19 +1,12 @@
 "use server";
 
+import { getExpenses, getProject } from "@/app/dashboard/dashboardActions";
 import {
-  getExpenses,
-  getExpensesIndexes,
-  getProject,
-  monthlyBudget,
-} from "@/app/dashboard/dashboardActions";
-import {
-  FIRSTEXPENSE,
   getFirstDayOfTheFollowingMonthInScoreFormat,
   getFirstDayOfTheMonthInScoreFormat,
 } from "@/app/dashboard/utils";
 import { initialState } from "@/app/providers/generalReducer";
 import { RemainingBudgetChartDataProps } from "./components/remainingBudget";
-import { Redis } from "@upstash/redis";
 
 export const getSelectedMonthExpensesGroupedByDay = async (
   selectedDate: Date
@@ -32,9 +25,16 @@ export const getSelectedMonthExpensesGroupedByDay = async (
   ).then((expensesIndexes) =>
     expensesIndexes.reduce(
       (acc, expense) => {
-        const date = expense.index.substring(8, 16);
+        const dateInStringFormat = expense.index.substring(8, 16);
+        const date = new Date(
+          Number.parseInt(dateInStringFormat.substring(0, 4)),
+          Number.parseInt(dateInStringFormat.substring(4, 6)) - 1,
+          Number.parseInt(dateInStringFormat.substring(6, 8))
+        );
+
         const alreadyExists = acc.some((e) => {
-          const match = e.slug === date;
+          const match =
+            e.date?.toLocaleDateString() === date.toLocaleDateString();
           if (match) {
             e.remainingBudget -= expense.amount;
           }
@@ -43,11 +43,8 @@ export const getSelectedMonthExpensesGroupedByDay = async (
 
         if (!alreadyExists) {
           acc.push({
-            slug: date,
-            name: `${date.substring(6, 8)}/${date.substring(
-              4,
-              6
-            )}/${date.substring(0, 4)}`,
+            date,
+            name: date.toLocaleDateString(),
             remainingBudget:
               acc[acc.length - 1].remainingBudget - expense.amount,
           });
@@ -55,7 +52,11 @@ export const getSelectedMonthExpensesGroupedByDay = async (
         return acc;
       },
       [
-        { name: "", remainingBudget: currentMonthlyBudget },
+        {
+          name: "",
+          remainingBudget: currentMonthlyBudget,
+          controlBudget: currentMonthlyBudget,
+        },
       ] as RemainingBudgetChartDataProps[]
     )
   );
