@@ -73,15 +73,15 @@ const Dashboard: React.FC<DashboardProps> = ({
   }, [shouldReloadExpenses]);
 
   return (
-    <div className=" grid flex-col grid-cols-6 gap-6 max-md:grid-cols-1">
-      <div className="col-start-3 col-span-3 max-md:col-start-1 max-md:col-span-1 row-span-10 flex justify-between max-md:justify-center">
+    <div className="flex flex-col">
+      <div className="flex justify-between max-md:justify-center">
         <ExpensesList
           expenses={expenses}
           dailyBudget={project?.dailyBudget}
           selectedDate={selectedExpensesDay}
         />
       </div>
-      <div className="col-start-2 max-md:col-start-1 col-span-4 max-md:col-span-1 row-span-1 flex justify-between max-md:flex-col max-md:items-center">
+      <div className="flex justify-between max-md:flex-col max-md:items-center">
         <Balance
           remainingBudget={remainingBudget}
           monthlyBudget={monthlyBudget}

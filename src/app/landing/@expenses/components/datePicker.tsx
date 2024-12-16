@@ -36,7 +36,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ onDateChanged }) => {
   }, [selectedDate]);
 
   return (
-    <div className="flex gap-4 overflow-x-auto no-scrollbar mb-10">
+    <div className="flex gap-4 overflow-x-auto no-scrollbar">
       <button className="text-textColor font-paragraph border-r-textColor border-r-[1px] pr-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"
