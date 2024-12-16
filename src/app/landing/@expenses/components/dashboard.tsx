@@ -1,11 +1,24 @@
 "use client";
 import { generalContext } from "@/app/providers/context";
 import { initialState } from "@/app/providers/generalReducer";
-import { getSelectedExpensesDay, getTriggerExpensesReload } from "@/app/providers/selectors";
+import {
+  getSelectedExpensesDay,
+  getTriggerExpensesReload,
+} from "@/app/providers/selectors";
 import { use, useEffect, useState } from "react";
 
-import { FIRSTEXPENSE, getDateInScoreFormat, getFirstDayOfTheFollowingMonthInScoreFormat, getFirstDayOfTheMonthInScoreFormat } from "../../utils";
-import { Expense, getExpenses, monthlyBudget as getMontlyBudget, ProjectBudget } from "../dashboardActions";
+import {
+  FIRSTEXPENSE,
+  getDateInScoreFormat,
+  getFirstDayOfTheFollowingMonthInScoreFormat,
+  getFirstDayOfTheMonthInScoreFormat,
+} from "../../utils";
+import {
+  Expense,
+  getExpenses,
+  monthlyBudget as getMontlyBudget,
+  ProjectBudget,
+} from "../dashboardActions";
 import Balance from "./balance";
 import ExpensesList from "./expensesList";
 interface DashboardProps {
@@ -27,9 +40,9 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   const [previousValue, setpreviousValue] = useState(selectedExpensesDay);
   const [expenses, setexpenses] = useState(initialExpenses);
-  const [monthlyBudget, setmonthlyBudget] =
+  const [monthlyBudget, setMonthlyBudget] =
     useState<number>(initialMonthlyBudget);
-  const [remainingBudget, setremainingBudget] = useState<number>(
+  const [remainingBudget, setRemainingBudget] = useState<number>(
     initialRemainingBudget
   );
   const fetchNewExpenses = async () => {
@@ -49,10 +62,10 @@ const Dashboard: React.FC<DashboardProps> = ({
     );
     setexpenses(newExpenses);
     const dailyExpenses = newExpenses.reduce(
-      (acc, expense) => acc + expense.amount,
+      (acc, expense) => acc + Number.parseFloat(expense.amount as string),
       0
     );
-    setremainingBudget(project?.dailyBudget! - dailyExpenses);
+    setRemainingBudget(project?.dailyBudget! - dailyExpenses);
     if (
       previousValue.getMonth() !== selectedExpensesDay.getMonth() ||
       !monthlyBudget
@@ -62,7 +75,7 @@ const Dashboard: React.FC<DashboardProps> = ({
         selectedDateFirstDayOfTheMonth,
         selectedDateFirstDayOfTheFollowingMonth
       );
-      setmonthlyBudget(budgetInAMonth);
+      setMonthlyBudget(budgetInAMonth);
     }
     setpreviousValue(selectedExpensesDay);
   };

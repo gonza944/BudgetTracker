@@ -15,7 +15,7 @@ export interface ProjectBudget {
 export interface Expense {
   category: string;
   description: string;
-  amount: number;
+  amount: number | string;
   index: string;
 }
 
@@ -80,7 +80,10 @@ export const monthlyBudget = cache(
           expenses.filter((expense) => expense !== null) as Expense[]
       )
       .then((expensesNotNull) =>
-        expensesNotNull.reduce((acc, expense) => acc + expense.amount, 0)
+        expensesNotNull.reduce(
+          (acc, expense) => acc + Number.parseFloat(expense.amount as string),
+          0
+        )
       )
       .then((totalExpenses) => project?.dailyBudget! * 30 - totalExpenses);
   }
@@ -91,7 +94,7 @@ export const createNewExpense = cache(
     const rawFormData = {
       description: formData.get("description") as string,
       category: formData.get("category") as string,
-      amount: Number.parseInt(formData.get("amount") as string),
+      amount: Number.parseFloat(formData.get("amount") as string),
     };
     try {
       if (
@@ -121,7 +124,7 @@ export const createNewExpense = cache(
           `expense:${todayInScoreFormat}${expenseOfDayNumber}`,
           rawFormData
         );
-        tx.hincrby(
+        tx.hincrbyfloat(
           initialState.currentProject,
           "total_expenses",
           rawFormData.amount
@@ -130,7 +133,9 @@ export const createNewExpense = cache(
 
         await tx.exec();
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error("error", error);
+    }
   }
 );
 
@@ -138,7 +143,11 @@ export const removeExpense = cache(async (expense: Expense) => {
   const tx = redis.multi();
   tx.hdel(expense.index, "description", "category", "amount");
   tx.zrem(`${initialState.currentProject}:expenses`, expense.index);
-  tx.hincrby(initialState.currentProject, "total_expenses", -expense.amount);
+  tx.hincrbyfloat(
+    initialState.currentProject,
+    "total_expenses",
+    -expense.amount
+  );
 
   await tx.exec();
 });
