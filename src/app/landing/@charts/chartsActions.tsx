@@ -48,7 +48,7 @@ export const getSelectedMonthExpensesGroupedByDay = async (
             dateInStringFormat.substring(6, 8)
           );
           const correspondingData = acc[expenseKey];
-          remainingBudget -= expense.amount;
+          remainingBudget -= Number.parseFloat(expense.amount as string);
           correspondingData.remainingBudget = remainingBudget;
 
           return acc;

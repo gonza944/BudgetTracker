@@ -36,7 +36,7 @@ const DashboardPage: React.FC = async () => {
   );
 
   const dailyExpenses = expenses.reduce(
-    (acc, expense) => acc + expense.amount,
+    (acc, expense) => acc + Number.parseFloat(expense.amount as string),
     0
   );
 

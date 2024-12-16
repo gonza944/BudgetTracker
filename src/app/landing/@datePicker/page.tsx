@@ -13,7 +13,7 @@ export default function HeaderPage() {
 
   return (
     <div className="flex flex-col items-center">
-      <div className=" col-start-1 col-span-6 max-md:col-start-1 max-md:col-span-1 row-span-1 flex justify-center max-md:justify-center overflow-x-auto no-scrollbar">
+      <div className="overflow-x-auto no-scrollbar">
         <DatePicker onDateChanged={handleOndateChanged} />
       </div>
     </div>

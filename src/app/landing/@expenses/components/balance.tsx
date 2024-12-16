@@ -22,7 +22,7 @@ const Balance: React.FC<BalanceProps> = ({
                 ? "text-primaryColor"
                 : "text-secondaryAccentColor"
             }`}>
-            ${remainingBudget}
+            ${remainingBudget.toFixed(2)}
           </p>
         ) : (
           <LoadingSpinner />
@@ -34,7 +34,7 @@ const Balance: React.FC<BalanceProps> = ({
         </p>
         {monthlyBudget ? (
           <p className="font-paragraph text-2xl text-primaryColor">
-            ${monthlyBudget}
+            ${monthlyBudget.toFixed(2)}
           </p>
         ) : (
           <LoadingSpinner />

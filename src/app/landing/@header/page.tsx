@@ -19,7 +19,7 @@ export default async function HeaderPage() {
             ? "text-primaryColor"
             : "text-secondaryAccentColor"
         } m-4`}>
-        $ {remainingBudget}
+        $ {remainingBudget.toFixed(2)}
       </h2>
     </div>
   );
