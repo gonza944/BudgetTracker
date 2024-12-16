@@ -1,11 +1,11 @@
 export default function Layout({
   header,
   charts,
-  expenses,
+  children,
   datePicker,
 }: {
   header: React.ReactNode;
-  expenses: React.ReactNode;
+  children: React.ReactNode;
   charts: React.ReactNode;
   datePicker: React.ReactNode;
 }) {
@@ -17,11 +17,11 @@ export default function Layout({
       <div className="row-span-1 col-span-4 items-center">
         {header}
       </div>
-      <div className="col-start-1 col-span-2 max-md:col-start-1 max-md:col-span-1">
+      <div className="col-start-1 col-span-2 max-md:col-start-1 max-md:col-span-1 max-md:hidden">
         {charts}
       </div>
       <div className="col-start-3 col-span-2 max-md:col-start-1 max-md:col-span-1">
-        {expenses}
+        {children}
       </div>
     </div>
   );

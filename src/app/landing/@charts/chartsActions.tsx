@@ -1,10 +1,10 @@
 "use server";
 
-import { getExpenses, getProject } from "@/app/dashboard/@expenses/dashboardActions";
+import { getExpenses, getProject } from "@/app/landing/@expenses/dashboardActions";
 import {
   getFirstDayOfTheFollowingMonthInScoreFormat,
   getFirstDayOfTheMonthInScoreFormat,
-} from "@/app/dashboard/utils";
+} from "@/app/landing/utils";
 import { initialState } from "@/app/providers/generalReducer";
 import { RemainingBudgetChartDataProps } from "./components/remainingBudget";
 
