@@ -6,8 +6,6 @@ import { useFormStatus } from "react-dom";
 const SubmitButton: React.FC = () => {
   const { pending } = useFormStatus();
 
-  console.log(pending);
-
   return !pending ? (
     <button type="submit">
       <svg

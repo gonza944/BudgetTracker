@@ -1,10 +1,10 @@
 "use client";
-import { useContext, useState } from "react";
-import { createNewExpense, Expense, removeExpense } from "../dashboardActions";
+import { generalContext } from "@/app/providers/context";
+import { Button } from "@headlessui/react";
+import { use, useState } from "react";
 import AddNewExpenseButton from "./addNewExpenseButton";
 import NewExpenseForm from "./newExpenseForm";
-import { Button } from "@headlessui/react";
-import { generalContext } from "@/app/providers/context";
+import { createNewExpense, Expense, removeExpense } from "../dashboardActions";
 
 interface Expenses {
   expenses: Expense[];
@@ -17,7 +17,7 @@ const ExpensesList: React.FC<Expenses> = ({
   dailyBudget,
   selectedDate,
 }) => {
-  const { dispatch } = useContext(generalContext);
+  const { dispatch } = use(generalContext);
 
 
   const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);

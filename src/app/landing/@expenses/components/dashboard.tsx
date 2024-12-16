@@ -1,24 +1,13 @@
 "use client";
 import { generalContext } from "@/app/providers/context";
 import { initialState } from "@/app/providers/generalReducer";
-import { useContext, useEffect, useState } from "react";
-import {
-  Expense,
-  getExpenses,
-  monthlyBudget as getMontlyBudget,
-  ProjectBudget,
-} from "../dashboardActions";
-import {
-  FIRSTEXPENSE,
-  getDateInScoreFormat,
-  getFirstDayOfTheFollowingMonthInScoreFormat,
-  getFirstDayOfTheMonthInScoreFormat,
-} from "../utils";
+import { getSelectedExpensesDay, getTriggerExpensesReload } from "@/app/providers/selectors";
+import { use, useEffect, useState } from "react";
+
+import { FIRSTEXPENSE, getDateInScoreFormat, getFirstDayOfTheFollowingMonthInScoreFormat, getFirstDayOfTheMonthInScoreFormat } from "../../utils";
+import { Expense, getExpenses, monthlyBudget as getMontlyBudget, ProjectBudget } from "../dashboardActions";
 import Balance from "./balance";
-import DatePicker from "./datePicker";
 import ExpensesList from "./expensesList";
-import OverallBalance from "./overallBalance";
-import { getSelectedExpensesDay } from "@/app/providers/selectors";
 interface DashboardProps {
   project: ProjectBudget | null;
   expenses: Expense[];
@@ -32,9 +21,9 @@ const Dashboard: React.FC<DashboardProps> = ({
   remainingBudget: initialRemainingBudget,
   monthlyBudget: initialMonthlyBudget,
 }) => {
-  const { context, dispatch } = useContext(generalContext);
+  const { context, dispatch } = use(generalContext);
   const selectedExpensesDay = getSelectedExpensesDay(context);
-  const shouldReloadExpenses = context.triggerExpensesReload;
+  const shouldReloadExpenses = getTriggerExpensesReload(context);
 
   const [previousValue, setpreviousValue] = useState(selectedExpensesDay);
   const [expenses, setexpenses] = useState(initialExpenses);
@@ -43,11 +32,6 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [remainingBudget, setremainingBudget] = useState<number>(
     initialRemainingBudget
   );
-
-  const handleOndateChanged = (date: Date) => {
-    dispatch({ type: "SET_SELECTED_EXPENSES_DAY", payload: date });
-  };
-
   const fetchNewExpenses = async () => {
     const theFollowingDay = new Date(selectedExpensesDay);
     theFollowingDay.setDate(theFollowingDay.getDate() + 1);
@@ -92,15 +76,6 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className=" grid flex-col grid-cols-6 gap-6 max-md:grid-cols-1">
-      <div className=" col-start-1 col-span-6 max-md:col-start-1 max-md:col-span-1 row-span-1 flex justify-center max-md:justify-center">
-        <DatePicker onDateChanged={handleOndateChanged} />
-      </div>
-      <div className="flex flex-col items-start max-md:items-center col-start-3 col-span-3 max-md:col-start-1 max-md:col-span-1 row-span-1 flex-wrap">
-        <OverallBalance
-          budget={project?.budget}
-          totalExpenses={project?.total_expenses}
-        />
-      </div>
       <div className="col-start-3 col-span-3 max-md:col-start-1 max-md:col-span-1 row-span-10 flex justify-between max-md:justify-center">
         <ExpensesList
           expenses={expenses}

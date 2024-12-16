@@ -2,8 +2,8 @@
 
 import { Redis } from "@upstash/redis";
 import { cache } from "react";
-import { FIRSTEXPENSE, getDateInScoreFormat } from "./utils";
-import { initialState } from "../providers/generalReducer";
+import { FIRSTEXPENSE, getDateInScoreFormat } from "../utils";
+import { initialState } from "../../providers/generalReducer";
 
 export interface ProjectBudget {
   budget: number;
