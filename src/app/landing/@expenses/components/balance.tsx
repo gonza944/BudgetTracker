@@ -12,7 +12,7 @@ const Balance: React.FC<BalanceProps> = ({
   return (
     <>
       <div className="flex gap-4 max-sm:gap-4">
-        <p className="text-2xl text-neutralBackgroundColorInverted font-paragraph">
+        <p className="text-2xl text-textColor font-paragraph">
           Daily Balance
         </p>
         {remainingBudget ? (
@@ -29,7 +29,7 @@ const Balance: React.FC<BalanceProps> = ({
         )}
       </div>
       <div className="flex gap-4 max-sm:gap-4">
-        <p className="text-2xl text-neutralBackgroundColorInverted font-paragraph">
+        <p className="text-2xl text-textColor font-paragraph">
           Monthly Balance
         </p>
         {monthlyBudget ? (

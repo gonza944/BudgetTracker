@@ -2,31 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-/* add the code bellow */ 
+/* add the code bellow */
 @layer utilities {
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
-      display: none;
+    display: none;
   }
- /* Hide scrollbar for IE, Edge and Firefox */
+  /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-      -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;  /* Firefox */
-}
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
 }
 
 :root {
-  --gray1: #262626;
-  --gray2: #f2f1e4;
-  --darkRed: #a6550f;
-  --yellow: #f2a444;
-  --green: #828c77;
+  --gray1: #1c1d26;
+  --gray2: #f2efe9;
+  --darkRed: #c1543c;
+  --yellow: #d7923c;
+  --green: #9fac92;
 }
 
 /* @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --gray1: #DFE0DA;
+    --gray2: #1B1719;
+    --darkRed: #F07160;
+    --yellow: #E6AA65;
+    --green: #D4E5C3;
   }
 } */
 

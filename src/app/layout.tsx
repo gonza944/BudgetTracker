@@ -4,12 +4,14 @@ import "./globals.css";
 import { Eczar } from "next/font/google";
 import { TasksProvider } from "./providers/context";
 
-const freudian = localFont({
-  src: "./fonts/Freudian.otf",
-  variable: "--font-freudian",
+const BlazheRegular = localFont({
+  src: "./fonts/BlazheRegular.otf",
+  variable: "--font-BlazheRegular",
 });
-
-const eczar = Eczar({ subsets: ["latin"] });
+const NapzerRegular = localFont({
+  src: "./fonts/NapzerRegular.otf",
+  variable: "--font-NapzerRegular",
+});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -23,7 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${freudian.variable} ${eczar.className} antialiased `}>
+      <body className={`${BlazheRegular.variable} ${NapzerRegular.className} antialiased`}>
         <main className="h-[100vh] md:p-16 max-sm:m-8 ">
           <TasksProvider>{children}</TasksProvider>
         </main>

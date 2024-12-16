@@ -12,7 +12,7 @@ const AddNewExpenseButton: React.FC<AddNewExpenseButtonProps> = ({ onClick }) =>
         viewBox="0 0 24 24"
         strokeWidth={1.5}
         stroke="currentColor"
-        className="size-8 stroke-neutralBackgroundColorInverted">
+        className="size-8 stroke-textColor">
         <path
           strokeLinecap="round"
           strokeLinejoin="round"

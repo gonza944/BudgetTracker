@@ -45,7 +45,7 @@ const ExpensesList: React.FC<Expenses> = ({
   return (
     <div className="flex flex-col">
       <div key="dailyBudget" className="flex gap-12 max-sm:gap-6">
-        <p className="text-2xl text-neutralBackgroundColorInverted font-paragraph">
+        <p className="text-2xl text-textColor font-paragraph">
           Daily Budget
         </p>
         <p className="font-paragraph text-2xl text-primaryColor">
@@ -57,13 +57,13 @@ const ExpensesList: React.FC<Expenses> = ({
           key={index}
           className={`flex gap-12 max-sm:gap-6 ${
             selectedExpense === index
-              ? "rounded-lg border-2 border-neutralBackgroundColorInverted"
+              ? "rounded-lg border-2 border-textColor"
               : ""
           }`}>
           <Button
             onClick={handleOnExpenseClick(index)}
             className={"flex gap-12 max-sm:gap-6"}>
-            <p className="text-2xl text-neutralBackgroundColorInverted font-paragraph">
+            <p className="text-2xl text-textColor font-paragraph">
               {expense.description}
             </p>
             <p className="font-paragraph text-2xl text-secondaryAccentColor">
@@ -78,7 +78,7 @@ const ExpensesList: React.FC<Expenses> = ({
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="size-8 stroke-neutralBackgroundColorInverted">
+                className="size-8 stroke-textColor">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

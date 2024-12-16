@@ -27,7 +27,7 @@ const NewBudgetPage: React.FC = () => {
     <form action={createNewBudget}>
       <div className="space-y-12">
         <div className="border-b border-gray-900/10 pb-12">
-          <h2 className="text-5xl font-title font-semibold text-neutralBackgroundColorInverted">
+          <h2 className="text-5xl font-title font-semibold text-textColor">
             New Budget
           </h2>
 
