@@ -1,7 +1,12 @@
 "use server";
 
-import { getExpenses, getProject } from "@/app/landing/@expenses/dashboardActions";
 import {
+  getExpenses,
+  getProject,
+} from "@/app/landing/@expenses/dashboardActions";
+import {
+  getFirstAndLastDayOfTheMonth,
+  getFirstAndLastDayOfTheMonthInScoreFormat,
   getFirstDayOfTheFollowingMonthInScoreFormat,
   getFirstDayOfTheMonthInScoreFormat,
 } from "@/app/landing/utils";
@@ -11,34 +16,26 @@ import { RemainingBudgetChartDataProps } from "./components/remainingBudget";
 type MakePropRequired<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
 
 export const getSelectedMonthExpensesGroupedByDay = async (
-  selectedDate: Date
+  month: number
 ): Promise<RemainingBudgetChartDataProps[]> => {
   const project = await getProject(initialState.currentProject);
   const currentMonthlyBudget = project?.dailyBudget! * 30;
-  const selectedDateFirstDayOfTheMonth =
-    getFirstDayOfTheMonthInScoreFormat(selectedDate);
-  const selectedDateFirstDayOfTheFollowingMonth =
-    getFirstDayOfTheFollowingMonthInScoreFormat(selectedDate);
-  const daysInMonth = new Date(
-    selectedDate.getFullYear(),
-    selectedDate.getMonth() + 1,
-    0
-  ).getDate();
+  const { firstDay, lastDay } = getFirstAndLastDayOfTheMonth(month);
+  const { firstDay: firstDayAsScore, lastDay: lastDayAsScore } =
+    getFirstAndLastDayOfTheMonthInScoreFormat(month);
+
+  const daysInMonth = lastDay.getDate();
   let remainingBudget = currentMonthlyBudget;
 
   const datesArray = Array.from({ length: daysInMonth }, (_, i) => {
-    const date = new Date(
-      selectedDate.getFullYear(),
-      selectedDate.getMonth(),
-      i + 1
-    );
+    const date = new Date(firstDay.getFullYear(), firstDay.getMonth(), i + 1);
     return { name: date.toLocaleDateString(), date };
   });
 
   return await getExpenses(
     `${initialState.currentProject}:expenses`,
-    selectedDateFirstDayOfTheMonth,
-    selectedDateFirstDayOfTheFollowingMonth
+    firstDayAsScore,
+    lastDayAsScore
   )
     .then((expensesIndexes) =>
       expensesIndexes.reduce(

@@ -2,7 +2,13 @@
 
 import { Redis } from "@upstash/redis";
 import { cache } from "react";
-import { FIRSTEXPENSE, getDateInScoreFormat } from "../utils";
+import {
+  FIRSTEXPENSE,
+  getDateFromScore,
+  getDateInScoreFormat,
+  getDateInScoreFormatWithoutExpenseNumber,
+  getFirstAndLastDayOfTheMonthInScoreFormat,
+} from "../utils";
 import { initialState } from "../../providers/generalReducer";
 
 export interface ProjectBudget {
@@ -62,32 +68,38 @@ export const getExpenses = cache(
   }
 );
 
-export const monthlyBudget = cache(
-  async (project: ProjectBudget, fromDate: number, toDate: number) => {
-    const montlyExpensesIndexes = await getExpensesIndexes(
-      `${initialState.currentProject}:expenses`,
-      fromDate,
-      toDate
-    );
+export const getExpensesForADay = cache(async (score: number) => {
+  const date = getDateFromScore(score);
+  const {firstDay, lastDay} = getFirstAndLastDayOfTheMonthInScoreFormat(date.getMonth());
 
-    return await Promise.all(
-      montlyExpensesIndexes.map(
-        (name: string) => redis.hgetall(name) as Promise<Expense | null>
+  return await getExpenses(
+    `${initialState.currentProject}:expenses`,
+    firstDay,
+    lastDay
+  ).then((expenses) =>
+    expenses.filter((expense) =>
+      expense.index.includes(score.toString().substring(0, 8))
+    )
+  );
+});
+
+export const monthlyBudget = cache(async (month: number) => {
+  const project = await getProject(initialState.currentProject);
+  const { firstDay, lastDay } =
+    getFirstAndLastDayOfTheMonthInScoreFormat(month);
+  return await getExpenses(
+    `${initialState.currentProject}:expenses`,
+    firstDay,
+    lastDay
+  )
+    .then((expensesNotNull) =>
+      expensesNotNull.reduce(
+        (acc, expense) => acc + Number.parseFloat(expense.amount as string),
+        0
       )
     )
-      .then(
-        (expenses) =>
-          expenses.filter((expense) => expense !== null) as Expense[]
-      )
-      .then((expensesNotNull) =>
-        expensesNotNull.reduce(
-          (acc, expense) => acc + Number.parseFloat(expense.amount as string),
-          0
-        )
-      )
-      .then((totalExpenses) => project?.dailyBudget! * 30 - totalExpenses);
-  }
-);
+    .then((totalExpenses) => project?.dailyBudget! * 30 - totalExpenses);
+});
 
 export const createNewExpense = cache(
   async (formData: FormData, expenseDate: Date) => {
@@ -105,8 +117,10 @@ export const createNewExpense = cache(
         const tx = redis.multi();
         const theFollowingDay = new Date(expenseDate);
         theFollowingDay.setDate(theFollowingDay.getDate() + 1);
-        const todayInScoreFormat = getDateInScoreFormat(expenseDate);
-        const tomorrowInScoreFormat = getDateInScoreFormat(theFollowingDay);
+        const todayInScoreFormat =
+          getDateInScoreFormatWithoutExpenseNumber(expenseDate);
+        const tomorrowInScoreFormat =
+          getDateInScoreFormatWithoutExpenseNumber(theFollowingDay);
         const expenseOfDayNumber = await redis
           .zcount(
             `${initialState.currentProject}:expenses`,

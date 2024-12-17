@@ -41,7 +41,7 @@ export default function RemainingBudget({
     if (shouldReloadExpenses && previousDate !== selectedExpensesDay) {
       (async () => {
         const data = await getSelectedMonthExpensesGroupedByDay(
-          selectedExpensesDay
+          selectedExpensesDay.getMonth()
         );
         setData(data);
         dispatch({ type: "EXPENSES_RELOADED" });
