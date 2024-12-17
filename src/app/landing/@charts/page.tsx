@@ -8,7 +8,7 @@ export const CHARTTYPES = {
 
 export default async function Page() {
   const chartData = await getSelectedMonthExpensesGroupedByDay(
-    initialState.selectedExpensesDay
+    initialState.selectedExpensesDay.getMonth()
   );
 
   return <RemainingBudget data={chartData} />;

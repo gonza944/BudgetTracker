@@ -1,6 +1,5 @@
 "use client";
 import { generalContext } from "@/app/providers/context";
-import { initialState } from "@/app/providers/generalReducer";
 import {
   getSelectedExpensesDay,
   getTriggerExpensesReload,
@@ -8,16 +7,13 @@ import {
 import { use, useEffect, useState } from "react";
 
 import {
-  FIRSTEXPENSE,
-  getDateInScoreFormat,
-  getFirstDayOfTheFollowingMonthInScoreFormat,
-  getFirstDayOfTheMonthInScoreFormat,
+  getDateInScoreFormat
 } from "../../utils";
 import {
   Expense,
-  getExpenses,
+  getExpensesForADay,
   monthlyBudget as getMontlyBudget,
-  ProjectBudget,
+  ProjectBudget
 } from "../dashboardActions";
 import Balance from "./balance";
 import ExpensesList from "./expensesList";
@@ -49,17 +45,8 @@ const Dashboard: React.FC<DashboardProps> = ({
     const theFollowingDay = new Date(selectedExpensesDay);
     theFollowingDay.setDate(theFollowingDay.getDate() + 1);
     const selectedDateInScoreFormat = getDateInScoreFormat(selectedExpensesDay);
-    const theFollowingDayInScoreFormat = getDateInScoreFormat(theFollowingDay);
-    const selectedDateFirstDayOfTheMonth =
-      getFirstDayOfTheMonthInScoreFormat(selectedExpensesDay);
-    const selectedDateFirstDayOfTheFollowingMonth =
-      getFirstDayOfTheFollowingMonthInScoreFormat(selectedExpensesDay);
 
-    const newExpenses = await getExpenses(
-      `${initialState.currentProject}:expenses`,
-      Number.parseInt(`${selectedDateInScoreFormat}${FIRSTEXPENSE}`),
-      Number.parseInt(`${theFollowingDayInScoreFormat}${FIRSTEXPENSE}`)
-    );
+    const newExpenses = await getExpensesForADay(selectedDateInScoreFormat);
     setexpenses(newExpenses);
     const dailyExpenses = newExpenses.reduce(
       (acc, expense) => acc + Number.parseFloat(expense.amount as string),
@@ -71,9 +58,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       !monthlyBudget
     ) {
       const budgetInAMonth = await getMontlyBudget(
-        project!,
-        selectedDateFirstDayOfTheMonth,
-        selectedDateFirstDayOfTheFollowingMonth
+        selectedExpensesDay.getMonth()
       );
       setMonthlyBudget(budgetInAMonth);
     }

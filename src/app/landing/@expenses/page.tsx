@@ -1,12 +1,16 @@
 import { initialState } from "@/app/providers/generalReducer";
-import { getProject, getExpenses, monthlyBudget } from "./dashboardActions";
 import {
-  getDateInScoreFormat,
-  getFirstDayOfTheMonthInScoreFormat,
-  getFirstDayOfTheFollowingMonthInScoreFormat,
   FIRSTEXPENSE,
+  getDateInScoreFormat,
+  getDateInScoreFormatWithoutExpenseNumber,
 } from "../utils";
 import Dashboard from "./components/dashboard";
+import {
+  getExpenses,
+  getExpensesForADay,
+  getProject,
+  monthlyBudget,
+} from "./dashboardActions";
 
 const DashboardPage: React.FC = async () => {
   const project = await getProject(initialState.currentProject);
@@ -15,24 +19,10 @@ const DashboardPage: React.FC = async () => {
   const selectedDateInScoreFormat = getDateInScoreFormat(
     initialState.selectedExpensesDay
   );
-  const theFollowingDayInScoreFormat = getDateInScoreFormat(theFollowingDay);
-  const selectedDateFirstDayOfTheMonth = getFirstDayOfTheMonthInScoreFormat(
-    initialState.selectedExpensesDay
-  );
-  const selectedDateFirstDayOfTheFollowingMonth =
-    getFirstDayOfTheFollowingMonthInScoreFormat(
-      initialState.selectedExpensesDay
-    );
-
-  const expenses = await getExpenses(
-    `${initialState.currentProject}:expenses`,
-    Number.parseInt(`${selectedDateInScoreFormat}${FIRSTEXPENSE}`),
-    Number.parseInt(`${theFollowingDayInScoreFormat}${FIRSTEXPENSE}`)
-  );
+ 
+  const expenses = await getExpensesForADay(selectedDateInScoreFormat);
   const budgetInAMonth = await monthlyBudget(
-    project!,
-    selectedDateFirstDayOfTheMonth,
-    selectedDateFirstDayOfTheFollowingMonth
+    initialState.selectedExpensesDay.getMonth()
   );
 
   const dailyExpenses = expenses.reduce(

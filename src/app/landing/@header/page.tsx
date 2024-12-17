@@ -3,7 +3,6 @@ import { getProject } from "../@expenses/dashboardActions";
 
 export default async function HeaderPage() {
   const project = await getProject(initialState.currentProject);
-
   if (!project) {
     return null;
   }
