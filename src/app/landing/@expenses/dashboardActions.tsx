@@ -2,14 +2,13 @@
 
 import { Redis } from "@upstash/redis";
 import { cache } from "react";
+import { initialState } from "../../providers/generalReducer";
 import {
   FIRSTEXPENSE,
   getDateFromScore,
-  getDateInScoreFormat,
   getDateInScoreFormatWithoutExpenseNumber,
-  getFirstAndLastDayOfTheMonthInScoreFormat,
+  getFirstAndLastDayOfTheMonthInScoreFormat
 } from "../utils";
-import { initialState } from "../../providers/generalReducer";
 
 export interface ProjectBudget {
   budget: number;
@@ -38,7 +37,7 @@ export const getProject = cache(
     )) as ProjectBudget | null
 );
 
-export const getExpensesIndexes = cache(
+const getExpensesIndexes = cache(
   async (projectName: string, fromDate: number, toDate: number) =>
     (await redis.zrange(projectName, fromDate, toDate, {
       byScore: true,

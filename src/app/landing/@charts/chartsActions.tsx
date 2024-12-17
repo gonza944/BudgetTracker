@@ -6,9 +6,7 @@ import {
 } from "@/app/landing/@expenses/dashboardActions";
 import {
   getFirstAndLastDayOfTheMonth,
-  getFirstAndLastDayOfTheMonthInScoreFormat,
-  getFirstDayOfTheFollowingMonthInScoreFormat,
-  getFirstDayOfTheMonthInScoreFormat,
+  getFirstAndLastDayOfTheMonthInScoreFormat
 } from "@/app/landing/utils";
 import { initialState } from "@/app/providers/generalReducer";
 import { RemainingBudgetChartDataProps } from "./components/remainingBudget";
