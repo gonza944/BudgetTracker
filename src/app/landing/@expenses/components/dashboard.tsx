@@ -26,20 +26,14 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({
   project,
   expenses: initialExpenses,
-  remainingBudget: initialRemainingBudget,
   monthlyBudget: initialMonthlyBudget,
 }) => {
   const { context, dispatch } = use(generalContext);
   const selectedExpensesDay = getSelectedExpensesDay(context);
   const shouldReloadExpenses = getTriggerExpensesReload(context);
 
-  const [previousValue, setpreviousValue] = useState(selectedExpensesDay);
   const [expenses, setexpenses] = useState(initialExpenses);
-  const [monthlyBudget, setMonthlyBudget] =
     useState<number>(initialMonthlyBudget);
-  const [remainingBudget, setRemainingBudget] = useState<number>(
-    initialRemainingBudget
-  );
   const fetchNewExpenses = async () => {
     const theFollowingDay = new Date(selectedExpensesDay);
     theFollowingDay.setDate(theFollowingDay.getDate() + 1);
@@ -47,21 +41,6 @@ const Dashboard: React.FC<DashboardProps> = ({
 
     const newExpenses = await getExpensesForADay(selectedDateInScoreFormat);
     setexpenses(newExpenses);
-    const dailyExpenses = newExpenses.reduce(
-      (acc, expense) => acc + Number.parseFloat(expense.amount as string),
-      0
-    );
-    setRemainingBudget(project?.dailyBudget! - dailyExpenses);
-    if (
-      previousValue.getMonth() !== selectedExpensesDay.getMonth() ||
-      !monthlyBudget
-    ) {
-      const budgetInAMonth = await getMontlyBudget(
-        selectedExpensesDay.getMonth()
-      );
-      setMonthlyBudget(budgetInAMonth);
-    }
-    setpreviousValue(selectedExpensesDay);
   };
 
   useEffect(() => {
@@ -80,12 +59,6 @@ const Dashboard: React.FC<DashboardProps> = ({
           selectedDate={selectedExpensesDay}
         />
       </div>
-    {/*   <div className="flex justify-between max-md:flex-col max-md:items-center">
-        <Balance
-          remainingBudget={remainingBudget}
-          monthlyBudget={monthlyBudget}
-        />
-      </div> */}
     </div>
   );
 };

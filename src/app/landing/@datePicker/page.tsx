@@ -65,7 +65,7 @@ export default function HeaderPage() {
           id={day.toLocaleDateString("es-ES")}
           onClick={() => handleOndateChanged(day)}>
           <p>{"("}</p>
-          <button>{day.toLocaleDateString("es-ES")}</button>
+          <p>{day.toLocaleDateString("es-ES")}</p>
           <p>{")"}</p>
         </button>
       ))}
