@@ -7,39 +7,38 @@ interface NewExpenseFormProps {
 
 const NewExpenseForm: React.FC<NewExpenseFormProps> = ({ onSave }) => {
   return (
-    <form className="flex gap-4" action={onSave}>
-      <Field>
-        <Input
-          required
-          id="description"
-          name="description"
-          placeholder="Description"
-          className="bg-backgroundColor mt-3 block w-full text-2xl text-textColor focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2 border-r-[1px] border-textColor"
-        />
-      </Field>
-      <Field>
+    <form className="flex flex-col w-full" action={onSave}>
+      <div className="flex items-stretch justify-between">
+        <Field>
+          <Input
+            required
+            id="description"
+            name="description"
+            placeholder="Description"
+            className="bg-backgroundColor text-lg leading-tight text-textColor focus:outline-none"
+          />
+        </Field>
+        <Field className="flex">
+          <p className="select-none text-lg leading-tight text-textColor">$</p>
+          <Input
+            required
+            id="amount"
+            name="amount"
+            type="number"
+            step="0.01"
+            className="bg-backgroundColor appearance-none text-lg leading-tight text-textColor focus:outline-none"
+          />
+        </Field>
+      </div>
+    {/*   <Field>
         <Input
           required
           id="category"
           name="category"
           placeholder="Category"
-          className=" bg-backgroundColor mt-3 block w-full text-2xl text-textColor focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2 border-r-[1px] border-textColor"
+          className=" bg-backgroundColor mt-3 block text-lg leading-tight text-textColor focus:outline-none"
         />
-      </Field>
-      <Field className="flex gap-2 items-baseline justify-center">
-        <p className=" select-none text-2xl text-textColor">
-          $
-        </p>
-        <Input
-          required
-          id="amount"
-          name="amount"
-          placeholder="Amount"
-          type="number"
-          step="0.01"
-          className=" bg-backgroundColor mt-3 block w-full text-2xl text-textColor focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2"
-        />
-      </Field>
+      </Field> */}
       <SubmitButton />
     </form>
   );

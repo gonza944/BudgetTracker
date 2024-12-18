@@ -15,7 +15,6 @@ import {
   monthlyBudget as getMontlyBudget,
   ProjectBudget
 } from "../dashboardActions";
-import Balance from "./balance";
 import ExpensesList from "./expensesList";
 interface DashboardProps {
   project: ProjectBudget | null;
@@ -74,19 +73,19 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   return (
     <div className="flex flex-col">
-      <div className="flex justify-between max-md:justify-center">
+      <div className="flex justify-between">
         <ExpensesList
           expenses={expenses}
           dailyBudget={project?.dailyBudget}
           selectedDate={selectedExpensesDay}
         />
       </div>
-      <div className="flex justify-between max-md:flex-col max-md:items-center">
+    {/*   <div className="flex justify-between max-md:flex-col max-md:items-center">
         <Balance
           remainingBudget={remainingBudget}
           monthlyBudget={monthlyBudget}
         />
-      </div>
+      </div> */}
     </div>
   );
 };

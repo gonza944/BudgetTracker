@@ -19,7 +19,6 @@ const ExpensesList: React.FC<Expenses> = ({
 }) => {
   const { dispatch } = use(generalContext);
 
-
   const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<number | null>(null);
 
@@ -43,30 +42,30 @@ const ExpensesList: React.FC<Expenses> = ({
   };
 
   return (
-    <div className="flex flex-col">
-      <div key="dailyBudget" className="flex gap-12 max-sm:gap-6">
-        <p className="text-2xl text-textColor font-paragraph">
-          Daily Budget
-        </p>
-        <p className="font-paragraph text-2xl text-primaryColor">
+    <div className="flex flex-col w-full">
+      <div
+        key="dailyBudget"
+        className="flex w-full items-stretch justify-between">
+        <p className="text-lg leading-tight font-bold text-textColor font-paragraph">Daily Budget</p>
+        <p className="font-paragraph text-lg leading-tight font-bold text-primaryColor self-end">
           ${dailyBudget}
         </p>
       </div>
       {expenses.map((expense, index) => (
         <div
           key={index}
-          className={`flex gap-12 max-sm:gap-6 ${
+          className={`flex ${
             selectedExpense === index
               ? "rounded-lg border-2 border-textColor"
               : ""
           }`}>
           <Button
             onClick={handleOnExpenseClick(index)}
-            className={"flex gap-12 max-sm:gap-6"}>
-            <p className="text-2xl text-textColor font-paragraph">
+            className={"flex items-stretch justify-between w-full"}>
+            <p className="text-lg leading-tight font-bold text-textColor font-paragraph">
               {expense.description}
             </p>
-            <p className="font-paragraph text-2xl text-secondaryAccentColor">
+            <p className="font-paragraph text-lg leading-tight font-bold text-secondaryAccentColor ml-auto self-end">
               ${expense.amount}
             </p>
           </Button>
