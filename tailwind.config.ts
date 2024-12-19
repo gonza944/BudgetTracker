@@ -13,6 +13,7 @@ export default {
       },
       colors: {
         backgroundColor: "var(--gray2)",
+        BackgroundAccentColor: "var(--gray3)",
         textColor: "var(--gray1)",
         primaryColor: "var(--green)",
         accentColor: "var(--yellow)",
@@ -24,7 +25,7 @@ export default {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
           "conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))",
-        grain: "url('https://grainy-gradients.vercel.app/noise.svg')",
+        grain: "url('../../public/grain.svg')",
       },
     },
   },

@@ -53,7 +53,7 @@ export default function RemainingBudget({
   const [data, setData] = useState(initialData);
 
   return (
-    <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height="100%" className='bg-BackgroundAccentColor rounded-md p-4 bg-grain'>
       <LineChart
         width={500}
         height={300}

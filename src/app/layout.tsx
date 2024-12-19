@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${BlazheRegular.variable} ${NapzerRegular.className} antialiased`}>
-        <main className="h-[100vh] md:p-4 max-sm:m-4 ">
+        <main className="h-[100vh] md:p-4 max-sm:m-4 bg-grain">
           <TasksProvider>{children}</TasksProvider>
         </main>
       </body>

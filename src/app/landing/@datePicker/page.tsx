@@ -36,7 +36,7 @@ export default function HeaderPage() {
   }, [selectedDate]);
 
   return (
-    <div className="flex gap-4 overflow-x-auto no-scrollbar">
+    <div className="flex gap-4 overflow-x-auto no-scrollbar mb-2">
       <button className="text-textColor font-paragraph border-r-textColor border-r-[1px] pr-4">
         <svg
           xmlns="http://www.w3.org/2000/svg"

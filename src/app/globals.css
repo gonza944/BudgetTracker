@@ -16,17 +16,18 @@
 }
 
 :root {
-  --gray1: #1c1d26;
-  --gray2: #f2efe9;
-  --darkRed: #c1543c;
-  --yellow: #d7923c;
-  --green: #9fac92;
+  --gray1: #303030;
+  --gray2: #F7EBD5;
+  --gray3: #E6DBC5;
+  --darkRed: #A54833;
+  --yellow: #BD7A3D;
+  --green: #838E78;
 }
 
 /* @media (prefers-color-scheme: dark) {
   :root {
-    --gray1: #DFE0DA;
-    --gray2: #1B1719;
+    --gray1: #F7EBD5;
+    --gray2: #303030;
     --darkRed: #F07160;
     --yellow: #E6AA65;
     --green: #D4E5C3;
