@@ -30,7 +30,7 @@ const NewExpenseForm: React.FC<NewExpenseFormProps> = ({ onSave }) => {
           />
         </Field>
       </div>
-    {/*   <Field>
+      <Field>
         <Input
           required
           id="category"
@@ -38,7 +38,7 @@ const NewExpenseForm: React.FC<NewExpenseFormProps> = ({ onSave }) => {
           placeholder="Category"
           className=" bg-backgroundColor mt-3 block text-lg leading-tight text-textColor focus:outline-none"
         />
-      </Field> */}
+      </Field>
       <SubmitButton />
     </form>
   );

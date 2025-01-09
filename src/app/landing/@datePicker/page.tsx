@@ -7,9 +7,9 @@ export default function HeaderPage() {
   const { dispatch } = use(generalContext);
 
   const [selectedDate, setselectedDate] = useState(new Date());
-  const days = Array.from({ length: 31 }, (_, i) => {
+  const days = Array.from({ length: 61 }, (_, i) => {
     const date = new Date();
-    date.setDate(date.getDate() - 15 + i); // Start 15 days before today
+    date.setDate(date.getDate() - 30 + i); // Start 15 days before today
     return date;
   });
 
