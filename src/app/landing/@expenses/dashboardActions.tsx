@@ -121,15 +121,19 @@ export const monthlyBudget = cache(async (month: number) => {
 });
 
 const createNewExpenseSchema = z.object({
-  description: z.string(),
-  category: z.string(),
-  amount: z.number(),
+  description: z.string().optional(),
+  category: z.string().optional(),
+  amount: z.string().transform((val) => Number.parseFloat(val)) ,
 });
 
 export const createNewExpense = cache(
   async (formData: FormData, expenseDate: Date) => {
     try {
-      const rawFormData = createNewExpenseSchema.parse(formData);
+      const rawFormData = createNewExpenseSchema.parse({
+        description: formData.get("description") as string,
+        category: formData.get("category") as string,
+        amount: formData.get("amount"),
+      });
 
       const tx = redis.multi();
       const theFollowingDay = new Date(expenseDate);
@@ -139,7 +143,7 @@ export const createNewExpense = cache(
       const tomorrowInScoreFormat =
         getDateInScoreFormatWithoutExpenseNumber(theFollowingDay);
 
-      const expenseOfDayNumber = z.number().transform((count) => count + 1).transform((count) => count.toString().padStart(4, "0")).parseAsync(await redis
+      const expenseOfDayNumber = await z.number().transform((count) => count + 1).transform((count) => count.toString().padStart(4, "0")).parseAsync(await redis
         .zcount(
           `${initialState.currentProject}:expenses`,
           Number.parseInt(`${todayInScoreFormat}${FIRSTEXPENSE}`),

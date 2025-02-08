@@ -11,7 +11,13 @@ const NewBudgetPage: React.FC = () => {
         description: z.string().optional(),
         dailyBudget: z.string().transform((val) => Number.parseFloat(val)),
         total_expenses: z.number().default(0)
-      }).parse(formData);
+      }).parse({
+        projectName: formData.get("project-name") as string,
+        budget: formData.get("budget"),
+        description: formData.get("description"),
+        dailyBudget: formData.get("dailyBudget"),
+        total_expenses: 0,
+      });
 
       const redis = Redis.fromEnv();
       const projectId = `project:${rawFormData.projectName.replace(
@@ -21,7 +27,7 @@ const NewBudgetPage: React.FC = () => {
       await redis.hset(projectId, rawFormData);
     } catch (error) {
       console.log(error);
-     }
+    }
   };
 
   return (
