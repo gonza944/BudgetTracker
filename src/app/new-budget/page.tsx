@@ -1,26 +1,27 @@
 import { Redis } from "@upstash/redis";
+import { z } from "zod";
 
 const NewBudgetPage: React.FC = () => {
   const createNewBudget = async (formData: FormData) => {
     "use server";
-
-    const rawFormData = {
-      projectName: formData.get("project-name") as string,
-      budget: formData.get("budget"),
-      description: formData.get("description"),
-      dailyBudget: formData.get("dailyBudget"),
-      total_expenses: 0,
-    };
     try {
+      const rawFormData = z.object({
+        projectName: z.string().min(1, "Project name is required"),
+        budget: z.string().transform((val) => Number.parseFloat(val)),
+        description: z.string().optional(),
+        dailyBudget: z.string().transform((val) => Number.parseFloat(val)),
+        total_expenses: z.number().default(0)
+      }).parse(formData);
+
       const redis = Redis.fromEnv();
-      if (rawFormData.projectName && rawFormData.budget) {
-        const projectId = `project:${rawFormData.projectName.replace(
-          " ",
-          "-"
-        )}`;
-        await redis.hset(projectId, rawFormData);
-      }
-    } catch (error) {}
+      const projectId = `project:${rawFormData.projectName.replace(
+        " ",
+        "-"
+      )}`;
+      await redis.hset(projectId, rawFormData);
+    } catch (error) {
+      console.log(error);
+     }
   };
 
   return (
