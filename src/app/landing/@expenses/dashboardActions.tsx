@@ -9,67 +9,87 @@ import {
   getDateInScoreFormatWithoutExpenseNumber,
   getFirstAndLastDayOfTheMonthInScoreFormat
 } from "../utils";
+import z from "zod";
 
-export interface ProjectBudget {
-  budget: number;
-  total_expenses: number;
-  dailyBudget: number;
-  projectName: string;
-}
+const ProjectBudgetSchema = z.object({
+  budget: z.number(),
+  total_expenses: z.number(),
+  dailyBudget: z.number(),
+  projectName: z.string(),
+})
+export type ProjectBudgetTypes = z.infer<typeof ProjectBudgetSchema>;
 
-export interface Expense {
-  category: string;
-  description: string;
-  amount: number | string;
-  index: string;
-}
+const expensesIndexes = z.array(z.string());
 
 const redis = Redis.fromEnv();
 
 export const getProject = cache(
-  async (projectName: string) =>
-    (await redis.hmget(
+  async (projectName: string) => {
+    const project = await redis.hmget(
       projectName,
       "budget",
       "dailyBudget",
       "total_expenses",
       "projectName"
-    )) as ProjectBudget | null
-);
+    );
+    return ProjectBudgetSchema.parse(project);
+  })
 
 const getExpensesIndexes = cache(
-  async (projectName: string, fromDate: number, toDate: number) =>
-    (await redis.zrange(projectName, fromDate, toDate, {
+  async (projectName: string, fromDate: number, toDate: number) => {
+    const indexes = await redis.zrange(projectName, fromDate, toDate, {
       byScore: true,
-    })) as string[]
+    });
+
+    return expensesIndexes.parse(indexes);
+  }
 );
+
+
+const ExpensesSchema = z.object({
+  expensesName: z.string(),
+  fromDate: z.number(),
+  toDate: z.number(),
+}).transform(async (data) => {
+  const expensesIndexes = await getExpensesIndexes(
+    `${initialState.currentProject}:expenses`,
+    data.fromDate,
+    data.toDate
+  );
+  const ExpenseSchema = z.object({
+    category: z.string(),
+    description: z.string(),
+    amount: z.union([z.string(), z.number()]),
+    index: z.string()
+  });
+
+  const expenses = await Promise.all(
+    expensesIndexes.map(async (name) => ({
+      ...(await redis.hgetall(name)),
+      index: name
+    }))
+  );
+
+  return ExpenseSchema.array().parse(expenses);
+}).transform((expenses) =>
+  expenses.filter((expense) => expense?.amount !== null)
+);
+
+export type Expense = z.infer<typeof ExpensesSchema>[0];
 
 export const getExpenses = cache(
   async (expensesName: string, fromDate: number, toDate: number) => {
-    const expensesIndexes: string[] = await getExpensesIndexes(
-      expensesName,
-      fromDate,
-      toDate
-    );
-
-    return await Promise.all(
-      expensesIndexes.map(
-        (name) => redis.hgetall(name) as Promise<Expense | null>
-      )
-    )
-      .then((expenses) =>
-        expenses.map((e, i) => ({ ...e, index: expensesIndexes[i] }))
-      )
-      .then(
-        (expenses) =>
-          expenses.filter((expense) => expense?.amount !== null) as Expense[]
-      );
+    return await ExpensesSchema.parseAsync({
+      expensesName: expensesName,
+      fromDate: fromDate,
+      toDate: toDate
+    });
   }
 );
 
 export const getExpensesForADay = cache(async (score: number) => {
   const date = getDateFromScore(score);
-  const {firstDay, lastDay} = getFirstAndLastDayOfTheMonthInScoreFormat(date.getMonth());
+  const { firstDay, lastDay } = getFirstAndLastDayOfTheMonthInScoreFormat(date.getMonth());
 
   return await getExpenses(
     `${initialState.currentProject}:expenses`,
@@ -100,52 +120,48 @@ export const monthlyBudget = cache(async (month: number) => {
     .then((totalExpenses) => project?.dailyBudget! * 30 - totalExpenses);
 });
 
+const createNewExpenseSchema = z.object({
+  description: z.string(),
+  category: z.string(),
+  amount: z.number(),
+});
+
 export const createNewExpense = cache(
   async (formData: FormData, expenseDate: Date) => {
-    const rawFormData = {
-      description: formData.get("description") as string,
-      category: formData.get("category") as string,
-      amount: Number.parseFloat(formData.get("amount") as string),
-    };
     try {
-      if (
-        rawFormData.description &&
-        rawFormData.amount &&
-        rawFormData.category
-      ) {
-        const tx = redis.multi();
-        const theFollowingDay = new Date(expenseDate);
-        theFollowingDay.setDate(theFollowingDay.getDate() + 1);
-        const todayInScoreFormat =
-          getDateInScoreFormatWithoutExpenseNumber(expenseDate);
-        const tomorrowInScoreFormat =
-          getDateInScoreFormatWithoutExpenseNumber(theFollowingDay);
-        const expenseOfDayNumber = await redis
-          .zcount(
-            `${initialState.currentProject}:expenses`,
-            Number.parseInt(`${todayInScoreFormat}${FIRSTEXPENSE}`),
-            Number.parseInt(`${tomorrowInScoreFormat}${FIRSTEXPENSE}`)
-          )
-          .then((count) => count + 1)
-          .then((count) => count.toString().padStart(4, "0"));
+      const rawFormData = createNewExpenseSchema.parse(formData);
 
-        tx.zadd(`${initialState.currentProject}:expenses`, {
-          score: Number.parseInt(`${todayInScoreFormat}${expenseOfDayNumber}`),
-          member: `expense:${todayInScoreFormat}${expenseOfDayNumber}`,
-        });
-        tx.hset(
-          `expense:${todayInScoreFormat}${expenseOfDayNumber}`,
-          rawFormData
-        );
-        tx.hincrbyfloat(
-          initialState.currentProject,
-          "total_expenses",
-          rawFormData.amount
-        );
-        tx.sadd("categories", rawFormData.category);
+      const tx = redis.multi();
+      const theFollowingDay = new Date(expenseDate);
+      theFollowingDay.setDate(theFollowingDay.getDate() + 1);
+      const todayInScoreFormat =
+        getDateInScoreFormatWithoutExpenseNumber(expenseDate);
+      const tomorrowInScoreFormat =
+        getDateInScoreFormatWithoutExpenseNumber(theFollowingDay);
 
-        await tx.exec();
-      }
+      const expenseOfDayNumber = z.number().transform((count) => count + 1).transform((count) => count.toString().padStart(4, "0")).parseAsync(await redis
+        .zcount(
+          `${initialState.currentProject}:expenses`,
+          Number.parseInt(`${todayInScoreFormat}${FIRSTEXPENSE}`),
+          Number.parseInt(`${tomorrowInScoreFormat}${FIRSTEXPENSE}`)
+        ))
+
+      tx.zadd(`${initialState.currentProject}:expenses`, {
+        score: Number.parseInt(`${todayInScoreFormat}${expenseOfDayNumber}`),
+        member: `expense:${todayInScoreFormat}${expenseOfDayNumber}`,
+      });
+      tx.hset(
+        `expense:${todayInScoreFormat}${expenseOfDayNumber}`,
+        rawFormData
+      );
+      tx.hincrbyfloat(
+        initialState.currentProject,
+        "total_expenses",
+        rawFormData.amount
+      );
+      tx.sadd("categories", rawFormData.category);
+
+      await tx.exec();
     } catch (error) {
       console.error("error", error);
     }
