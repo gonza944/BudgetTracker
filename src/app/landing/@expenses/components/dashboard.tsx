@@ -13,12 +13,12 @@ import {
   Expense,
   getExpensesForADay,
   monthlyBudget as getMontlyBudget,
-  ProjectBudget
+  ProjectBudgetTypes
 } from "../dashboardActions";
 import Balance from "./balance";
 import ExpensesList from "./expensesList";
 interface DashboardProps {
-  project: ProjectBudget | null;
+  project: ProjectBudgetTypes | null;
   expenses: Expense[];
   remainingBudget: number;
   monthlyBudget: number;
