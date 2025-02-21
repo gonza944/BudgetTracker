@@ -1,10 +1,10 @@
 "use client";
-import { generalContext } from "@/app/providers/context";
+import { useProjectStore } from "@/app/store/projectStore";
 import { Button } from "@headlessui/react";
-import { use, useState } from "react";
+import { useState } from "react";
+import { Expense } from "../dashboardActions";
 import AddNewExpenseButton from "./addNewExpenseButton";
 import NewExpenseForm from "./newExpenseForm";
-import { createNewExpense, Expense, removeExpense } from "../dashboardActions";
 
 interface Expenses {
   expenses: Expense[];
@@ -17,8 +17,7 @@ const ExpensesList: React.FC<Expenses> = ({
   dailyBudget,
   selectedDate,
 }) => {
-  const { dispatch } = use(generalContext);
-
+  const { removeExpense, projectName, createNewExpense } = useProjectStore();
 
   const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<number | null>(null);
@@ -31,14 +30,11 @@ const ExpensesList: React.FC<Expenses> = ({
     }
   };
   const handleRemoveExpense = (index: number) => async () => {
-    await removeExpense(expenses[index]);
-    dispatch({ type: "TRIGGER_EXPENSES_RELOAD" });
-    setSelectedExpense(null);
+    removeExpense(projectName, expenses[index]);
   };
 
   const handleOnAddingNewExpense = async (formData: FormData) => {
-    await createNewExpense(formData, selectedDate);
-    dispatch({ type: "TRIGGER_EXPENSES_RELOAD" });
+    createNewExpense(formData, selectedDate, projectName);
     setIsAddingOrEditing(false);
   };
 
@@ -55,11 +51,10 @@ const ExpensesList: React.FC<Expenses> = ({
       {expenses.map((expense, index) => (
         <div
           key={index}
-          className={`flex gap-12 max-sm:gap-6 ${
-            selectedExpense === index
-              ? "rounded-lg border-2 border-neutralBackgroundColorInverted"
-              : ""
-          }`}>
+          className={`flex gap-12 max-sm:gap-6 ${selectedExpense === index
+            ? "rounded-lg border-2 border-neutralBackgroundColorInverted"
+            : ""
+            }`}>
           <Button
             onClick={handleOnExpenseClick(index)}
             className={"flex gap-12 max-sm:gap-6"}>

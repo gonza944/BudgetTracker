@@ -1,8 +1,11 @@
-import { initialState } from "@/app/providers/generalReducer";
-import { getProject } from "../@expenses/dashboardActions";
+"use client";
 
-export default async function HeaderPage() {
-  const project = await getProject(initialState.currentProject);
+import { useProjectStore } from "@/app/store/projectStore";
+
+export default function HeaderPage() {
+  const { project } = useProjectStore();
+
+
   if (!project) {
     return null;
   }
@@ -13,11 +16,10 @@ export default async function HeaderPage() {
     <div className="flex flex-col items-center">
       <h1 className="font-title text-5xl">Overall Balance</h1>
       <h2
-        className={`font-title text-7xl ${
-          remainingBudget >= 0
-            ? "text-primaryColor"
-            : "text-secondaryAccentColor"
-        } m-4`}>
+        className={`font-title text-7xl ${remainingBudget >= 0
+          ? "text-primaryColor"
+          : "text-secondaryAccentColor"
+          } m-4`}>
         $ {remainingBudget.toFixed(2)}
       </h2>
     </div>

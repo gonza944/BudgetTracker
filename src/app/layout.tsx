@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Eczar } from "next/font/google";
-import { TasksProvider } from "./providers/context";
 
 const freudian = localFont({
   src: "./fonts/Freudian.otf",
@@ -25,7 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${freudian.variable} ${eczar.className} antialiased `}>
         <main className="h-[100vh] md:p-16 max-sm:m-8 ">
-          <TasksProvider>{children}</TasksProvider>
+          {children}
         </main>
       </body>
     </html>

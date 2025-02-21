@@ -1,13 +1,12 @@
 import { redirect } from "next/navigation";
 import { getFirstAndLastDayOfTheMonthInScoreFormat } from "./landing/utils";
-import { initialState } from "./providers/generalReducer";
-import { getExpenses, getProject } from "./landing/@expenses/dashboardActions";
+import { getExpenses, getProject } from "./landing/dashboardActions";
 
 export default function Home() {
   const { firstDay, lastDay } = getFirstAndLastDayOfTheMonthInScoreFormat(
-    initialState.selectedExpensesDay.getMonth()
+    new Date().getMonth()
   );
-  void getProject(initialState.currentProject);
-  void getExpenses(`${initialState.currentProject}:expenses`, firstDay, lastDay);
+  void getProject('project:viaje-europa-2024');
+  void getExpenses(`${'project:viaje-europa-2024'}:expenses`, firstDay, lastDay);
   redirect("/landing");
 }
