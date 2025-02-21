@@ -1,23 +1,19 @@
 "use client";
-import { useProjectStore } from "@/app/store/projectStore";
+import { getExpensesForADay, useProjectStore } from "@/app/store/projectStore";
 import { Button } from "@headlessui/react";
 import { useState } from "react";
-import { Expense } from "../dashboardActions";
 import AddNewExpenseButton from "./addNewExpenseButton";
 import NewExpenseForm from "./newExpenseForm";
 
-interface Expenses {
-  expenses: Expense[];
-  dailyBudget?: number;
-  selectedDate: Date;
-}
 
-const ExpensesList: React.FC<Expenses> = ({
-  expenses,
-  dailyBudget,
-  selectedDate,
+
+const ExpensesList: React.FC = ({
 }) => {
-  const { removeExpense, projectName, createNewExpense } = useProjectStore();
+  const state = useProjectStore();
+  const { removeExpense, projectName, createNewExpense, project, selectedExpensesDay: selectedDate } = state;
+  const expenses = getExpensesForADay(state);
+
+  const { dailyBudget } = project;
 
   const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
   const [selectedExpense, setSelectedExpense] = useState<number | null>(null);

@@ -13,7 +13,7 @@ export default function Page() {
 
   useEffect(() => {
     setProject(projectName);
-    setMonthlyExpenses(`${projectName}: expenses`, firstDay, lastDay);
+    setMonthlyExpenses(`${projectName}:expenses`, firstDay, lastDay);
   }, [])
 
   return <Dashboard />;

@@ -61,7 +61,7 @@ export const useProjectStore = create<StoreTypes>((set) => ({
     },
 }))
 
-const getExpensesForADay = ({ selectedExpensesDay, monthlyExpenses }: StoreTypes) => {
+export const getExpensesForADay = ({ selectedExpensesDay, monthlyExpenses }: StoreTypes) => {
     const selectedDateInScoreFormat = getDateInScoreFormat(selectedExpensesDay)
     return monthlyExpenses.filter((expense) => expense.index.includes(selectedDateInScoreFormat.toString().substring(0, 8))
     )
