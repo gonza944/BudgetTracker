@@ -1,11 +1,7 @@
 "use client";
 
-import { generalContext } from "@/app/providers/context";
-import {
-  getSelectedExpensesDay,
-  getTriggerExpensesReload,
-} from "@/app/providers/selectors";
-import { use, useEffect, useState } from "react";
+import { getSelectedMonthExpensesGroupedByDay, useProjectStore } from "@/app/store/projectStore";
+import { useMemo } from "react";
 import {
   CartesianGrid,
   Line,
@@ -16,7 +12,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { getSelectedMonthExpensesGroupedByDay } from "../chartsActions";
 
 export interface RemainingBudgetChartDataProps {
   name: string;
@@ -25,32 +20,9 @@ export interface RemainingBudgetChartDataProps {
   date?: Date;
 }
 
-interface IRemainingBudgetProps {
-  data: RemainingBudgetChartDataProps[];
-}
-
-export default function RemainingBudget({
-  data: initialData,
-}: IRemainingBudgetProps) {
-  const { context, dispatch } = use(generalContext);
-  const selectedExpensesDay = getSelectedExpensesDay(context);
-  const shouldReloadExpenses = getTriggerExpensesReload(context);
-  const [previousDate, setPreviousDate] = useState(selectedExpensesDay);
-
-  useEffect(() => {
-    if (shouldReloadExpenses && previousDate !== selectedExpensesDay) {
-      (async () => {
-        const data = await getSelectedMonthExpensesGroupedByDay(
-          selectedExpensesDay.getMonth()
-        );
-        setData(data);
-        dispatch({ type: "EXPENSES_RELOADED" });
-        setPreviousDate(selectedExpensesDay);
-      })();
-    }
-  }, [shouldReloadExpenses]);
-
-  const [data, setData] = useState(initialData);
+export default function RemainingBudget() {
+  const state = useProjectStore();
+  const data = useMemo(() => getSelectedMonthExpensesGroupedByDay(state), [state]);
 
   return (
     <ResponsiveContainer width="100%" height="100%">
@@ -74,7 +46,7 @@ export default function RemainingBudget({
           segment={[
             { x: "", y: data[0].controlBudget },
             {
-              x: data[data.length - 1].name,
+              x: data[getSelectedMonthExpensesGroupedByDay.length - 1].name,
               y: 0,
             },
           ]}

@@ -1,14 +1,14 @@
 "use client";
 
-import { generalContext } from "@/app/providers/context";
 import { use } from "react";
-import DatePicker from "../@expenses/components/datePicker";
+import DatePicker from "../components/datePicker";
+import { useProjectStore } from "@/app/store/projectStore";
 
 export default function HeaderPage() {
-  const { dispatch } = use(generalContext);
+  const { setNewSelectedExpensesDay } = useProjectStore();
 
   const handleOndateChanged = (date: Date) => {
-    dispatch({ type: "SET_SELECTED_EXPENSES_DAY", payload: date });
+    setNewSelectedExpensesDay(date);
   };
 
   return (

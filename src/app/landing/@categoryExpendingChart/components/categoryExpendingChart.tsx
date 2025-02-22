@@ -1,47 +1,14 @@
 "use client";
 
-import { generalContext } from "@/app/providers/context";
+import { getSelectedMonthExpensesGroupedByCategory, useProjectStore } from "@/app/store/projectStore";
 import {
-  getSelectedExpensesDay,
-  getTriggerExpensesReload,
-} from "@/app/providers/selectors";
-import { use, useEffect, useState } from "react";
-import {
-  Cell,
   Pie,
   PieChart,
   ResponsiveContainer
 } from "recharts";
-import { getSelectedMonthExpensesGroupedByCategory } from "../categoryExpendingChartActions";
-import { categoryExpendingChartDataProps } from "../page";
 
-interface ICategoryExpendingChartProps {
-  data: categoryExpendingChartDataProps[];
-}
-
-export default function CategoryExpendingChart({
-  data: initialData,
-}: ICategoryExpendingChartProps) {
-  const { context, dispatch } = use(generalContext);
-  const selectedExpensesDay = getSelectedExpensesDay(context);
-  const shouldReloadExpenses = getTriggerExpensesReload(context);
-  const [previousDate, setPreviousDate] = useState(selectedExpensesDay);
-
-  useEffect(() => {
-    if (shouldReloadExpenses && previousDate !== selectedExpensesDay) {
-      (async () => {
-        const data = await getSelectedMonthExpensesGroupedByCategory(
-          selectedExpensesDay.getMonth()
-        );
-        setData(data);
-        dispatch({ type: "EXPENSES_RELOADED" });
-        setPreviousDate(selectedExpensesDay);
-      })();
-    }
-  }, [shouldReloadExpenses]);
-
-  const [data, setData] = useState(initialData);
-
+export default function CategoryExpendingChart() {
+  const data = useProjectStore(getSelectedMonthExpensesGroupedByCategory)
   return (
     <ResponsiveContainer width="100%" height="100%">
       <PieChart width={400} height={400}>

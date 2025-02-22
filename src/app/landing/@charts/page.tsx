@@ -1,5 +1,3 @@
-import { initialState } from "@/app/providers/generalReducer";
-import { getSelectedMonthExpensesGroupedByDay } from "./chartsActions";
 import RemainingBudget from "./components/remainingBudget";
 
 export const CHARTTYPES = {
@@ -7,9 +5,5 @@ export const CHARTTYPES = {
 };
 
 export default async function Page() {
-  const chartData = await getSelectedMonthExpensesGroupedByDay(
-    initialState.selectedExpensesDay.getMonth()
-  );
-
-  return <RemainingBudget data={chartData} />;
+  return <RemainingBudget />;
 }

@@ -1,5 +1,3 @@
-import { initialState } from "@/app/providers/generalReducer";
-import { getSelectedMonthExpensesGroupedByCategory } from "./categoryExpendingChartActions";
 import CategoryExpendingChart from "./components/categoryExpendingChart";
 
 export interface categoryExpendingChartDataProps {
@@ -9,10 +7,5 @@ export interface categoryExpendingChartDataProps {
 
 
 export default async function Page() {
-  
-  const chartData = await getSelectedMonthExpensesGroupedByCategory(
-    initialState.selectedExpensesDay.getMonth()
-  );
-
-  return <CategoryExpendingChart data={chartData} />;
+  return <CategoryExpendingChart />;
 }

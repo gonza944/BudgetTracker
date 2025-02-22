@@ -2,14 +2,12 @@
 
 import { Redis } from "@upstash/redis";
 import { cache } from "react";
-import { initialState } from "../../providers/generalReducer";
+import z from "zod";
 import {
   FIRSTEXPENSE,
-  getDateFromScore,
-  getDateInScoreFormatWithoutExpenseNumber,
-  getFirstAndLastDayOfTheMonthInScoreFormat
-} from "../utils";
-import z from "zod";
+  getDateInScoreFormatWithoutExpenseNumber
+} from "./utils";
+import { createNewExpenseSchema } from "../store/schemas";
 
 const ProjectBudgetSchema = z.object({
   budget: z.number(),
@@ -45,6 +43,13 @@ const getExpensesIndexes = cache(
   }
 );
 
+const ExpenseSchemaObject = z.object({
+  category: z.string(),
+  description: z.string(),
+  amount: z.union([z.string(), z.number()]),
+  index: z.string()
+});
+
 
 const ExpensesSchema = z.object({
   expensesName: z.string(),
@@ -52,17 +57,10 @@ const ExpensesSchema = z.object({
   toDate: z.number(),
 }).transform(async (data) => {
   const expensesIndexes = await getExpensesIndexes(
-    `${initialState.currentProject}:expenses`,
+    data.expensesName,
     data.fromDate,
     data.toDate
   );
-  const ExpenseSchema = z.object({
-    category: z.string(),
-    description: z.string(),
-    amount: z.union([z.string(), z.number()]),
-    index: z.string()
-  });
-
   const expenses = await Promise.all(
     expensesIndexes.map(async (name) => ({
       ...(await redis.hgetall(name)),
@@ -70,70 +68,29 @@ const ExpensesSchema = z.object({
     }))
   );
 
-  return ExpenseSchema.array().parse(expenses);
+  return ExpenseSchemaObject.array().parse(expenses);
 }).transform((expenses) =>
   expenses.filter((expense) => expense?.amount !== null)
 );
 
-export type Expense = z.infer<typeof ExpensesSchema>[0];
+export type Expense = z.infer<typeof ExpenseSchemaObject>;
+export type ExpensesArray = z.infer<typeof ExpensesSchema>;
 
 export const getExpenses = cache(
   async (expensesName: string, fromDate: number, toDate: number) => {
     return await ExpensesSchema.parseAsync({
       expensesName: expensesName,
       fromDate: fromDate,
-      toDate: toDate
+      toDate: toDate,
     });
   }
 );
 
-export const getExpensesForADay = cache(async (score: number) => {
-  const date = getDateFromScore(score);
-  const { firstDay, lastDay } = getFirstAndLastDayOfTheMonthInScoreFormat(date.getMonth());
-
-  return await getExpenses(
-    `${initialState.currentProject}:expenses`,
-    firstDay,
-    lastDay
-  ).then((expenses) =>
-    expenses.filter((expense) =>
-      expense.index.includes(score.toString().substring(0, 8))
-    )
-  );
-});
-
-export const monthlyBudget = cache(async (month: number) => {
-  const project = await getProject(initialState.currentProject);
-  const { firstDay, lastDay } =
-    getFirstAndLastDayOfTheMonthInScoreFormat(month);
-  return await getExpenses(
-    `${initialState.currentProject}:expenses`,
-    firstDay,
-    lastDay
-  )
-    .then((expensesNotNull) =>
-      expensesNotNull.reduce(
-        (acc, expense) => acc + Number.parseFloat(expense.amount as string),
-        0
-      )
-    )
-    .then((totalExpenses) => project?.dailyBudget! * 30 - totalExpenses);
-});
-
-const createNewExpenseSchema = z.object({
-  description: z.string().optional(),
-  category: z.string().optional(),
-  amount: z.string().transform((val) => Number.parseFloat(val)) ,
-});
+export type CreateNewExpenseRawData = z.infer<typeof createNewExpenseSchema>;
 
 export const createNewExpense = cache(
-  async (formData: FormData, expenseDate: Date) => {
+  async (rawFormData: CreateNewExpenseRawData, expenseDate: Date, projectName: string): Promise<{ data: Expense, success: true } | { success: false, data: undefined }> => {
     try {
-      const rawFormData = createNewExpenseSchema.parse({
-        description: formData.get("description") as string,
-        category: formData.get("category") as string,
-        amount: formData.get("amount"),
-      });
 
       const tx = redis.multi();
       const theFollowingDay = new Date(expenseDate);
@@ -145,12 +102,12 @@ export const createNewExpense = cache(
 
       const expenseOfDayNumber = await z.number().transform((count) => count + 1).transform((count) => count.toString().padStart(4, "0")).parseAsync(await redis
         .zcount(
-          `${initialState.currentProject}:expenses`,
+          `${projectName}:expenses`,
           Number.parseInt(`${todayInScoreFormat}${FIRSTEXPENSE}`),
           Number.parseInt(`${tomorrowInScoreFormat}${FIRSTEXPENSE}`)
         ))
 
-      tx.zadd(`${initialState.currentProject}:expenses`, {
+      tx.zadd(`${projectName}:expenses`, {
         score: Number.parseInt(`${todayInScoreFormat}${expenseOfDayNumber}`),
         member: `expense:${todayInScoreFormat}${expenseOfDayNumber}`,
       });
@@ -159,27 +116,41 @@ export const createNewExpense = cache(
         rawFormData
       );
       tx.hincrbyfloat(
-        initialState.currentProject,
+        projectName,
         "total_expenses",
         rawFormData.amount
       );
       tx.sadd("categories", rawFormData.category);
 
       await tx.exec();
+      return {
+        success: true,
+        data: {
+          ...rawFormData,
+          index: `expense:${todayInScoreFormat}${expenseOfDayNumber}`,
+          category: rawFormData.category ?? "",
+          description: rawFormData.description ?? "",
+        }
+      };
     } catch (error) {
       console.error("error", error);
+      return {
+        success: false,
+        data: undefined
+      };
     }
   }
 );
 
-export const removeExpense = cache(async (expense: Expense) => {
+export const removeExpense = cache(async (expense: Expense, projectName: string) => {
+  const validatedExpense = ExpenseSchemaObject.parse(expense);
   const tx = redis.multi();
-  tx.hdel(expense.index, "description", "category", "amount");
-  tx.zrem(`${initialState.currentProject}:expenses`, expense.index);
+  tx.hdel(validatedExpense.index, "description", "category", "amount");
+  tx.zrem(`${projectName}:expenses`, validatedExpense.index);
   tx.hincrbyfloat(
-    initialState.currentProject,
+    projectName,
     "total_expenses",
-    -expense.amount
+    -validatedExpense.amount
   );
 
   await tx.exec();
