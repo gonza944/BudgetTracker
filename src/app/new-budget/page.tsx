@@ -1,17 +1,56 @@
 import { Redis } from "@upstash/redis";
+import { useState } from "react";
 import { z } from "zod";
 
+const schema = z.object({
+  projectName: z.string().min(1, "Project name is required"),
+  budget: z.string().transform((val) => Number.parseFloat(val)),
+  description: z.string().optional(),
+  dailyBudget: z.string().transform((val) => Number.parseFloat(val)),
+  total_expenses: z.number().default(0)
+});
+
+const getFieldData = () => ({
+  projectName: {
+    schema: schema.shape.projectName,
+    getValue: (formData: FormData) => formData.get("projectName") as string
+  },
+  budget: {
+    schema: schema.shape.budget,
+    getValue: (formData: FormData) => formData.get("budget") as string
+  },
+  description: {
+    schema: schema.shape.description,
+    getValue: (formData: FormData) => formData.get("description") as string
+  },
+  dailyBudget: {
+    schema: schema.shape.dailyBudget,
+    getValue: (formData: FormData) => formData.get("dailyBudget") as string
+  },
+  total_expenses: {
+    schema: schema.shape.total_expenses,
+    getValue: (formData: FormData) => formData.get("total_expenses") as string
+  }
+});
+
 const NewBudgetPage: React.FC = () => {
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  const validateField = (name: string, value: string) => {
+    const fieldData = getFieldData();
+    const field = fieldData[name as keyof typeof fieldData];
+    if (!field) return;
+    const result = field.schema.safeParse(value);
+    setErrors((prev) => ({
+      ...prev,
+      [name]: !result.success ? result.error.issues[0].message : "",
+    }));
+  };
+
   const createNewBudget = async (formData: FormData) => {
     "use server";
     try {
-      const rawFormData = z.object({
-        projectName: z.string().min(1, "Project name is required"),
-        budget: z.string().transform((val) => Number.parseFloat(val)),
-        description: z.string().optional(),
-        dailyBudget: z.string().transform((val) => Number.parseFloat(val)),
-        total_expenses: z.number().default(0)
-      }).parse({
+      const rawFormData = schema.parse({
         projectName: formData.get("project-name") as string,
         budget: formData.get("budget"),
         description: formData.get("description"),
@@ -50,8 +89,12 @@ const NewBudgetPage: React.FC = () => {
                   id="project-name"
                   name="project-name"
                   type="text"
+                  onBlur={(e) => validateField("projectName", e.target.value)}
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                 />
+                {errors.projectName && (
+                  <p className="text-red-500 text-sm mt-1">{errors.projectName}</p>
+                )}
               </div>
             </div>
 
@@ -71,8 +114,12 @@ const NewBudgetPage: React.FC = () => {
                     name="budget"
                     type="text"
                     placeholder="0.00"
+                    onBlur={(e) => validateField("budget", e.target.value)}
                     className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
                   />
+                  {errors.budget && (
+                    <p className="text-red-500 text-sm mt-1">{errors.budget}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -93,8 +140,12 @@ const NewBudgetPage: React.FC = () => {
                     name="dailyBudget"
                     type="text"
                     placeholder="0.00"
+                    onBlur={(e) => validateField("dailyBudget", e.target.value)}
                     className="block min-w-0 grow py-1.5 pl-1 pr-3 text-base text-gray-900 placeholder:text-gray-400 focus:outline focus:outline-0 sm:text-sm/6"
                   />
+                  {errors.dailyBudget && (
+                    <p className="text-red-500 text-sm mt-1">{errors.dailyBudget}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -110,9 +161,13 @@ const NewBudgetPage: React.FC = () => {
                   id="description"
                   name="description"
                   rows={3}
+                  onBlur={(e) => validateField("description", e.target.value)}
                   className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                   defaultValue={""}
                 />
+                {errors.description && (
+                  <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+                )}
               </div>
             </div>
           </div>
