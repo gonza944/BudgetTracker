@@ -1,34 +1,28 @@
-import { Redis } from "@upstash/redis";
-import { useState } from "react";
-import { z } from "zod";
+"use client";
 
-const schema = z.object({
-  projectName: z.string().min(1, "Project name is required"),
-  budget: z.string().transform((val) => Number.parseFloat(val)),
-  description: z.string().optional(),
-  dailyBudget: z.string().transform((val) => Number.parseFloat(val)),
-  total_expenses: z.number().default(0)
-});
+import { useState } from "react";
+import { createNewBudget } from "./budgetActions";
+import { budgetFormSchema } from "./schemas";
 
 const getFieldData = () => ({
   projectName: {
-    schema: schema.shape.projectName,
+    schema: budgetFormSchema.shape.projectName,
     getValue: (formData: FormData) => formData.get("projectName") as string
   },
   budget: {
-    schema: schema.shape.budget,
+    schema: budgetFormSchema.shape.budget,
     getValue: (formData: FormData) => formData.get("budget") as string
   },
   description: {
-    schema: schema.shape.description,
+    schema: budgetFormSchema.shape.description,
     getValue: (formData: FormData) => formData.get("description") as string
   },
   dailyBudget: {
-    schema: schema.shape.dailyBudget,
+    schema: budgetFormSchema.shape.dailyBudget,
     getValue: (formData: FormData) => formData.get("dailyBudget") as string
   },
   total_expenses: {
-    schema: schema.shape.total_expenses,
+    schema: budgetFormSchema.shape.total_expenses,
     getValue: (formData: FormData) => formData.get("total_expenses") as string
   }
 });
@@ -45,28 +39,6 @@ const NewBudgetPage: React.FC = () => {
       ...prev,
       [name]: !result.success ? result.error.issues[0].message : "",
     }));
-  };
-
-  const createNewBudget = async (formData: FormData) => {
-    "use server";
-    try {
-      const rawFormData = schema.parse({
-        projectName: formData.get("project-name") as string,
-        budget: formData.get("budget"),
-        description: formData.get("description"),
-        dailyBudget: formData.get("dailyBudget"),
-        total_expenses: 0,
-      });
-
-      const redis = Redis.fromEnv();
-      const projectId = `project:${rawFormData.projectName.replace(
-        " ",
-        "-"
-      )}`;
-      await redis.hset(projectId, rawFormData);
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   return (
