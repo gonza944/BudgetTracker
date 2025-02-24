@@ -14,6 +14,7 @@ export default {
       colors: {
         backgroundColor: "var(--green)",
         neutralBackgroundColor: "var(--gray2)",
+        neutralBackgroundColorGradient: "var(--gray3)",
         neutralBackgroundColorInverted: "var(--gray1)",
         primaryColor: "var(--green)",
         accentColor: "var(--yellow)",
