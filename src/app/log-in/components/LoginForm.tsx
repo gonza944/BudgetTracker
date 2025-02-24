@@ -69,7 +69,7 @@ export default function LoginForm() {
     };
 
     return (
-        <div className="flex flex-col w-full max-w-md p-8 rounded-2xl bg-[#EAE9DC]/90 backdrop-blur-md shadow-lg">
+        <div className="flex flex-col w-full md:max-w-md p-8 md:rounded-2xl md:bg-[#EAE9DC]/90 md:backdrop-blur-md md:shadow-lg bg-neutralBackgroundColor">
             <div className="flex flex-col items-center">
                 <h1 className="text-2xl font-bold text-neutralBackgroundColorInverted mb-8">Log In</h1>
             </div>
@@ -82,10 +82,10 @@ export default function LoginForm() {
                         placeholder="Name"
                         required
                         onChange={(e) => validateField("name", e.target.value)}
-                        className={`w-full p-3 rounded-lg bg-white/50 backdrop-blur-sm text-neutralBackgroundColorInverted placeholder-neutralBackgroundColorInverted/70 border-2 focus:outline-none ${errors.name ? 'border-red-500' : 'border-transparent'}`}
+                        className={`w-full p-3 rounded-lg bg-white/50 backdrop-blur-sm text-neutralBackgroundColorInverted placeholder-neutralBackgroundColorInverted/70 border-2 focus:outline-none ${errors.name ? 'border-secondaryAccentColor' : 'border-transparent'}`}
                     />
                     {errors.name && (
-                        <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+                        <p className="text-secondaryAccentColor text-sm mt-1">{errors.name}</p>
                     )}
                 </div>
                 <div>
@@ -95,10 +95,10 @@ export default function LoginForm() {
                         placeholder="Username"
                         required
                         onChange={(e) => validateField("username", e.target.value)}
-                        className={`w-full p-3 rounded-lg bg-white/50 backdrop-blur-sm text-neutralBackgroundColorInverted placeholder-neutralBackgroundColorInverted/70 border-2 focus:outline-none ${errors.username ? 'border-red-500' : 'border-transparent'}`}
+                        className={`w-full p-3 rounded-lg bg-white/50 backdrop-blur-sm text-neutralBackgroundColorInverted placeholder-neutralBackgroundColorInverted/70 border-2 focus:outline-none ${errors.username ? 'border-secondaryAccentColor' : 'border-transparent'}`}
                     />
                     {errors.username && (
-                        <p className="text-red-500 text-sm mt-1">{errors.username}</p>
+                        <p className="text-secondaryAccentColor text-sm mt-1">{errors.username}</p>
                     )}
                 </div>
                 <div>
@@ -108,10 +108,10 @@ export default function LoginForm() {
                         placeholder="Password"
                         required
                         onChange={(e) => validateField("password", e.target.value)}
-                        className={`w-full p-3 rounded-lg bg-white/50 backdrop-blur-sm text-neutralBackgroundColorInverted placeholder-neutralBackgroundColorInverted/70 border-2 focus:outline-none ${errors.password ? 'border-red-500' : 'border-transparent'}`}
+                        className={`w-full p-3 rounded-lg bg-white/50 backdrop-blur-sm text-neutralBackgroundColorInverted placeholder-neutralBackgroundColorInverted/70 border-2 focus:outline-none ${errors.password ? 'border-secondaryAccentColor' : 'border-transparent'}`}
                     />
                     {errors.password && (
-                        <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                        <p className="text-secondaryAccentColor text-sm mt-1">{errors.password}</p>
                     )}
                 </div>
                 <button

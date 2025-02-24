@@ -23,7 +23,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${freudian.variable} ${eczar.className} antialiased `}>
-        <main className="h-[100vh] md:p-16 max-sm:m-8 bg-grain">
+        <main className="h-[100vh] md:p-16 max-sm:m-8 md:bg-grain bg-neutralBackgroundColor">
           {children}
         </main>
       </body>
