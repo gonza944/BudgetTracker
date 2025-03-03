@@ -1,4 +1,4 @@
-import { auth, signIn } from "@/auth";
+import { signIn } from "@/auth";
 import AuthButton from "@/components/AuthButton";
 
 export default async function LogInPage() {
