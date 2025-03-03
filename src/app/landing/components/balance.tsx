@@ -1,4 +1,4 @@
-import LoadingSpinner from "@/utils/loadingSpinner";
+import LoadingSpinner from "@/components/loadingSpinner";
 
 interface BalanceProps {
   remainingBudget?: number;

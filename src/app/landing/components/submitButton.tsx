@@ -1,6 +1,6 @@
 "use client";
 
-import LoadingSpinner from "@/utils/loadingSpinner";
+import LoadingSpinner from "@/components/loadingSpinner";
 import { useFormStatus } from "react-dom";
 
 const SubmitButton: React.FC = () => {
