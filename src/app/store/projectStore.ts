@@ -4,6 +4,7 @@ import { create } from 'zustand'
 import { createNewExpense, Expense, ExpensesArray, getExpenses, getProject, ProjectBudgetTypes, removeExpense } from '../landing/dashboardActions'
 import { getDateInScoreFormat, getFirstAndLastDayOfTheMonth } from '../landing/utils'
 import { createNewExpenseSchema } from './schemas'
+import { DEFAULT_PROJECT, getUserProjectKey } from '@/utils/userUtils';
 
 type StoreTypes = {
     projectName: string
@@ -12,14 +13,14 @@ type StoreTypes = {
     project: ProjectBudgetTypes
     totalRemainingBudget: number
     setProject: (projectName: string) => Promise<void>
-    createNewExpense: (formData: FormData, expenseDate: Date, projectName: string) => void
+    createNewExpense: (formData: FormData, expenseDate: Date, projectName: string, userEmail: string) => void
     removeExpense: (projectName: string, expense: Expense) => void
     setMonthlyExpenses: (projectExpenses: string, firstDay: number, lastDay: number) => Promise<void>
     setNewSelectedExpensesDay: (newSelectedExpensesDay: Date) => void
 }
 
 export const useProjectStore = create<StoreTypes>((set) => ({
-    projectName: 'project:viaje-europa-2024',
+    projectName: getUserProjectKey('gonza94.4@gmail.com', DEFAULT_PROJECT),
     selectedExpensesDay: new Date(),
     monthlyExpenses: [],
     project: {
@@ -31,15 +32,15 @@ export const useProjectStore = create<StoreTypes>((set) => ({
     totalRemainingBudget: 0,
     setProject: async (projectName: string) => {
         const project = await getProject(projectName);
-        set({ project, totalRemainingBudget: project.budget - project.total_expenses });
+        set({ project, totalRemainingBudget: project.budget - project.total_expenses, projectName });
     },
-    createNewExpense: async (formData, expenseDate, projectName) => {
+    createNewExpense: async (formData, expenseDate, projectName, userEmail) => {
         const rawFormData = createNewExpenseSchema.parse({
             description: formData.get("description") as string,
             category: formData.get("category") as string,
             amount: formData.get("amount"),
         });
-        const newExpense = await createNewExpense(rawFormData, expenseDate, projectName)
+        const newExpense = await createNewExpense(rawFormData, expenseDate, projectName, userEmail)
         if (newExpense.success) {
             set((state) => ({
                 monthlyExpenses: [newExpense.data, ...state.monthlyExpenses]

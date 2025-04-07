@@ -1,40 +1,47 @@
 "use server";
 
+import {
+  getUserCategoriesKey,
+  getUserExpenseKey,
+  getUserExpensesKey,
+  getUserProjectKey,
+  getUserProjectsKey,
+} from "@/utils/userUtils";
 import { Redis } from "@upstash/redis";
 import { cache } from "react";
 import z from "zod";
+import { createNewExpenseSchema } from "../store/schemas";
 import {
   FIRSTEXPENSE,
-  getDateInScoreFormatWithoutExpenseNumber
+  getDateInScoreFormatWithoutExpenseNumber,
 } from "./utils";
-import { createNewExpenseSchema } from "../store/schemas";
 
 const ProjectBudgetSchema = z.object({
   budget: z.number(),
   total_expenses: z.number(),
   dailyBudget: z.number(),
   projectName: z.string(),
-})
+});
 export type ProjectBudgetTypes = z.infer<typeof ProjectBudgetSchema>;
 
 const expensesIndexes = z.array(z.string());
 
 const redis = Redis.fromEnv();
 
-export const getProject = cache(
-  async (projectName: string) => {
-    const project = await redis.hmget(
-      projectName,
-      "budget",
-      "dailyBudget",
-      "total_expenses",
-      "projectName"
-    );
-    return ProjectBudgetSchema.parse(project);
-  })
+export const getProject = cache(async (projectName: string) => {
+  const project = await redis.hmget(
+    projectName,
+    "budget",
+    "dailyBudget",
+    "total_expenses",
+    "projectName"
+  );
+  return ProjectBudgetSchema.parse(project);
+});
 
 const getExpensesIndexes = cache(
   async (projectName: string, fromDate: number, toDate: number) => {
+
     const indexes = await redis.zrange(projectName, fromDate, toDate, {
       byScore: true,
     });
@@ -47,31 +54,33 @@ const ExpenseSchemaObject = z.object({
   category: z.string(),
   description: z.string(),
   amount: z.union([z.string(), z.number()]),
-  index: z.string()
+  index: z.string(),
 });
 
+const ExpensesSchema = z
+  .object({
+    expensesName: z.string(),
+    fromDate: z.number(),
+    toDate: z.number(),
+  })
+  .transform(async (data) => {
+    const expensesIndexes = await getExpensesIndexes(
+      data.expensesName,
+      data.fromDate,
+      data.toDate
+    );
+    const expenses = await Promise.all(
+      expensesIndexes.map(async (name) => ({
+        ...(await redis.hgetall(name)),
+        index: name,
+      }))
+    );
 
-const ExpensesSchema = z.object({
-  expensesName: z.string(),
-  fromDate: z.number(),
-  toDate: z.number(),
-}).transform(async (data) => {
-  const expensesIndexes = await getExpensesIndexes(
-    data.expensesName,
-    data.fromDate,
-    data.toDate
+    return ExpenseSchemaObject.array().parse(expenses);
+  })
+  .transform((expenses) =>
+    expenses.filter((expense) => expense?.amount !== null)
   );
-  const expenses = await Promise.all(
-    expensesIndexes.map(async (name) => ({
-      ...(await redis.hgetall(name)),
-      index: name
-    }))
-  );
-
-  return ExpenseSchemaObject.array().parse(expenses);
-}).transform((expenses) =>
-  expenses.filter((expense) => expense?.amount !== null)
-);
 
 export type Expense = z.infer<typeof ExpenseSchemaObject>;
 export type ExpensesArray = z.infer<typeof ExpensesSchema>;
@@ -89,7 +98,14 @@ export const getExpenses = cache(
 export type CreateNewExpenseRawData = z.infer<typeof createNewExpenseSchema>;
 
 export const createNewExpense = cache(
-  async (rawFormData: CreateNewExpenseRawData, expenseDate: Date, projectName: string): Promise<{ data: Expense, success: true } | { success: false, data: undefined }> => {
+  async (
+    rawFormData: CreateNewExpenseRawData,
+    expenseDate: Date,
+    projectName: string,
+    userEmail: string
+  ): Promise<
+    { data: Expense; success: true } | { success: false; data: undefined }
+  > => {
     try {
 
       const tx = redis.multi();
@@ -100,58 +116,80 @@ export const createNewExpense = cache(
       const tomorrowInScoreFormat =
         getDateInScoreFormatWithoutExpenseNumber(theFollowingDay);
 
-      const expenseOfDayNumber = await z.number().transform((count) => count + 1).transform((count) => count.toString().padStart(4, "0")).parseAsync(await redis
-        .zcount(
-          `${projectName}:expenses`,
-          Number.parseInt(`${todayInScoreFormat}${FIRSTEXPENSE}`),
-          Number.parseInt(`${tomorrowInScoreFormat}${FIRSTEXPENSE}`)
-        ))
+      const userExpensesKey = getUserExpensesKey(userEmail, projectName);
 
-      tx.zadd(`${projectName}:expenses`, {
-        score: Number.parseInt(`${todayInScoreFormat}${expenseOfDayNumber}`),
-        member: `expense:${todayInScoreFormat}${expenseOfDayNumber}`,
-      });
-      tx.hset(
-        `expense:${todayInScoreFormat}${expenseOfDayNumber}`,
-        rawFormData
+      // Get count of expenses for the day and format as string with padding
+      const expenseCount = await redis.zcount(
+        userExpensesKey,
+        Number.parseInt(`${todayInScoreFormat}${FIRSTEXPENSE}`),
+        Number.parseInt(`${tomorrowInScoreFormat}${FIRSTEXPENSE}`)
       );
+
+      // Convert to string and pad with zeros
+      const expenseOfDayNumber = (expenseCount + 1).toString().padStart(4, "0");
+
+      const expenseKey = getUserExpenseKey(
+        userEmail,
+        todayInScoreFormat.toString(),
+        expenseOfDayNumber
+      );
+
+      // Calculate score as string first, then parse to number
+      const scoreValue = Number.parseInt(
+        `${todayInScoreFormat}${expenseOfDayNumber}`
+      );
+
+      tx.zadd(userExpensesKey, {
+        score: scoreValue,
+        member: expenseKey,
+      });
+
+      tx.hset(expenseKey, rawFormData);
+
+      // Use string value for hincrbyfloat
       tx.hincrbyfloat(
-        projectName,
+        getUserProjectKey(userEmail, projectName),
         "total_expenses",
         rawFormData.amount
       );
-      tx.sadd("categories", rawFormData.category);
+
+      tx.sadd(getUserCategoriesKey(userEmail), rawFormData.category);
 
       await tx.exec();
       return {
         success: true,
         data: {
           ...rawFormData,
-          index: `expense:${todayInScoreFormat}${expenseOfDayNumber}`,
+          index: expenseKey,
           category: rawFormData.category ?? "",
           description: rawFormData.description ?? "",
-        }
+        },
       };
     } catch (error) {
       console.error("error", error);
       return {
         success: false,
-        data: undefined
+        data: undefined,
       };
     }
   }
 );
 
-export const removeExpense = cache(async (expense: Expense, projectName: string) => {
-  const validatedExpense = ExpenseSchemaObject.parse(expense);
-  const tx = redis.multi();
-  tx.hdel(validatedExpense.index, "description", "category", "amount");
-  tx.zrem(`${projectName}:expenses`, validatedExpense.index);
-  tx.hincrbyfloat(
-    projectName,
-    "total_expenses",
-    -validatedExpense.amount
-  );
+export const removeExpense = cache(
+  async (expense: Expense, projectName: string) => {
+    const validatedExpense = ExpenseSchemaObject.parse(expense);
 
-  await tx.exec();
-});
+    const tx = redis.multi();
+    tx.hdel(validatedExpense.index, "description", "category", "amount");
+    tx.zrem(projectName, validatedExpense.index);
+
+    // Use string value for hincrbyfloat
+    tx.hincrbyfloat(
+      projectName,
+      "total_expenses",
+      -Number.parseFloat(validatedExpense.amount.toString())
+    );
+
+    await tx.exec();
+  }
+);

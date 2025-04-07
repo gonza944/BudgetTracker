@@ -5,5 +5,6 @@ export const budgetFormSchema = z.object({
     budget: z.string().transform((val) => Number.parseFloat(val)),
     description: z.string().optional(),
     dailyBudget: z.string().transform((val) => Number.parseFloat(val)),
-    total_expenses: z.number().default(0)
+    total_expenses: z.number().default(0),
+    userEmail: z.string().min(1, "User email is required"),
   });
